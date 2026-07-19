@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
+import { StatCards } from '../components/StatCards'
 
 const emptyForm = { name: '', description: '', link: '' }
 
@@ -114,11 +115,22 @@ export function AdminRegistryPage() {
     }
   }
 
+  const stats = useMemo(() => {
+    const claimed = gifts.filter((gift) => gift.claimed_by).length
+    return [
+      { label: 'Total Gifts', value: gifts.length },
+      { label: 'Unclaimed', value: gifts.length - claimed },
+      { label: 'Claimed', value: claimed },
+    ]
+  }, [gifts])
+
   return (
     <main className="admin-dashboard">
       <header className="admin-header">
         <h1>Gift Registry</h1>
       </header>
+
+      {!loading && !error && <StatCards stats={stats} />}
 
       <div className="admin-toolbar">
         <button type="button" onClick={formOpen ? closeForm : openAddForm}>
@@ -158,7 +170,7 @@ export function AdminRegistryPage() {
         </form>
       )}
 
-      {loading && <p className="auth-status">Loading gift registry…</p>}
+      {loading && <p className="status-message">Loading gift registry…</p>}
       {error && <p className="login-error">{error}</p>}
 
       {!loading && !error && (

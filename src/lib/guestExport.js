@@ -32,7 +32,12 @@ function downloadBlob(content, filename, mimeType) {
 }
 
 function escapeCsvValue(value) {
-  const str = String(value ?? '')
+  let str = String(value ?? '')
+  // Neutralize formula injection: a leading =, +, -, @, tab, or CR makes
+  // Excel/Sheets interpret the cell as a formula when the file is opened.
+  if (/^[=+\-@\t\r]/.test(str)) {
+    str = `'${str}`
+  }
   return /[",\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str
 }
 

@@ -20,14 +20,14 @@ function App() {
           <Route path="/" element={<GuestLayout />}>
             <Route index element={<RsvpPage />} />
             <Route path="registry" element={<RegistryPage />} />
-            <Route path="details" element={<DetailsPage />} />
             <Route path="trip" element={<TripPage />} />
+            <Route path="details" element={<DetailsPage />} />
           </Route>
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminGuestListPage />} />
             <Route path="registry" element={<AdminRegistryPage />} />
-            <Route path="details" element={<AdminDetailsPage />} />
             <Route path="trip" element={<AdminTripPage />} />
+            <Route path="details" element={<AdminDetailsPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

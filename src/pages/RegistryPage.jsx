@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
+import { ContactNote } from '../components/ContactNote'
 
 export function RegistryPage() {
   const [gifts, setGifts] = useState([])
@@ -68,22 +69,19 @@ export function RegistryPage() {
     setClaiming(true)
     setClaimError('')
 
-    const { data, error: claimErr } = await supabase
-      .from('gifts')
-      .update({ claimed_by: claimName.trim(), claimed_at: new Date().toISOString() })
-      .eq('id', gift.id)
-      .is('claimed_by', null)
-      .select()
+    const { error: claimErr } = await supabase.rpc('claim_gift', {
+      gift_id: gift.id,
+      claimer_name: claimName.trim(),
+    })
 
     setClaiming(false)
 
     if (claimErr) {
-      setClaimError('Something went wrong. Please try again.')
-      return
-    }
-
-    if (!data || data.length === 0) {
-      setClaimError('Sorry, someone just claimed this gift.')
+      if (claimErr.message?.includes('already_claimed')) {
+        setClaimError('Sorry, someone just claimed this gift.')
+      } else {
+        setClaimError('Something went wrong. Please try again.')
+      }
       return
     }
 
@@ -101,7 +99,7 @@ export function RegistryPage() {
         </p>
       </div>
 
-      {loading && <p className="auth-status">Loading gift registry…</p>}
+      {loading && <p className="status-message">Loading gift registry…</p>}
       {error && <p className="login-error">{error}</p>}
 
       {!loading && !error && (
@@ -155,6 +153,8 @@ export function RegistryPage() {
           {gifts.length === 0 && <p>No gifts have been added yet — check back soon!</p>}
         </ul>
       )}
+
+      <ContactNote />
     </div>
   )
 }

@@ -12,11 +12,11 @@ export function GuestNav({ onLogout }) {
         <NavLink to="/registry" className={linkClass}>
           Gift Registry
         </NavLink>
-        <NavLink to="/details" className={linkClass}>
-          Wedding Details &amp; FAQs
-        </NavLink>
         <NavLink to="/trip" className={linkClass}>
           Trip
+        </NavLink>
+        <NavLink to="/details" className={linkClass}>
+          Wedding Details &amp; FAQs
         </NavLink>
       </div>
       <button className="log-out-button" onClick={onLogout}>

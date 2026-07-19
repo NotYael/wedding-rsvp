@@ -41,7 +41,7 @@ export function PageContent({ slug }) {
     }
   }, [slug])
 
-  if (loading) return <p className="auth-status">Loading…</p>
+  if (loading) return <p className="status-message">Loading…</p>
   if (error) return <p className="login-error">{error}</p>
 
   return (

@@ -74,7 +74,7 @@ export function AdminPageEditor({ slug, label }) {
         </Modal>
       )}
 
-      {loading && <p className="auth-status">Loading…</p>}
+      {loading && <p className="status-message">Loading…</p>}
       {error && <p className="login-error">{error}</p>}
 
       {!loading && !error && (

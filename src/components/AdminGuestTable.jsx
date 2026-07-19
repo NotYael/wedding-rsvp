@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { downloadGuestsAsCsv, downloadGuestsAsPdf } from '../lib/guestExport'
+import { StatCards } from './StatCards'
 
 const PARTY_COLORS = ['#f6d9d0', '#d9e4f5', '#dcefdc', '#f5e6c8', '#e6d9f2', '#d0f0ef']
 
@@ -88,11 +89,22 @@ export function AdminGuestTable() {
       .filter((party) => party.members.length > 0)
   }, [parties, search])
 
+  const stats = useMemo(
+    () => [
+      { label: 'Total Guests', value: guests.length },
+      { label: 'Parties', value: parties.length },
+      { label: 'Dietary Restrictions', value: guests.filter((guest) => guest.dietary_restrictions?.trim()).length },
+    ],
+    [guests, parties],
+  )
+
   return (
     <main className="admin-dashboard">
       <header className="admin-header">
         <h1>Guest List</h1>
       </header>
+
+      {!loading && !error && <StatCards stats={stats} />}
 
       <div className="admin-toolbar">
         <input
@@ -107,7 +119,7 @@ export function AdminGuestTable() {
         </button>
       </div>
 
-      {loading && <p className="auth-status">Loading guest list…</p>}
+      {loading && <p className="status-message">Loading guest list…</p>}
       {error && <p className="login-error">{error}</p>}
 
       {!loading && !error && (
