@@ -1,10 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthProvider'
 import { GuestLayout } from './pages/GuestLayout'
-import { RsvpPage } from './pages/RsvpPage'
+import { HomePage } from './pages/HomePage'
 import { RegistryPage } from './pages/RegistryPage'
-import { DetailsPage } from './pages/DetailsPage'
-import { TripPage } from './pages/TripPage'
 import { AdminLayout } from './pages/AdminLayout'
 import { AdminGuestListPage } from './pages/AdminGuestListPage'
 import { AdminRegistryPage } from './pages/AdminRegistryPage'
@@ -18,10 +16,8 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<GuestLayout />}>
-            <Route index element={<RsvpPage />} />
+            <Route index element={<HomePage />} />
             <Route path="registry" element={<RegistryPage />} />
-            <Route path="trip" element={<TripPage />} />
-            <Route path="details" element={<DetailsPage />} />
           </Route>
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminGuestListPage />} />

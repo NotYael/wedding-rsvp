@@ -108,7 +108,7 @@ export function AdminRegistryPage() {
   const handleUnclaim = async (gift) => {
     const { error: unclaimError } = await supabase
       .from('gifts')
-      .update({ claimed_by: null, claimed_at: null })
+      .update({ claimed_at: null })
       .eq('id', gift.id)
     if (unclaimError) {
       setError('Could not unclaim the gift. Please try again.')
@@ -116,7 +116,7 @@ export function AdminRegistryPage() {
   }
 
   const stats = useMemo(() => {
-    const claimed = gifts.filter((gift) => gift.claimed_by).length
+    const claimed = gifts.filter((gift) => gift.claimed_at).length
     return [
       { label: 'Total Gifts', value: gifts.length },
       { label: 'Unclaimed', value: gifts.length - claimed },
@@ -181,7 +181,7 @@ export function AdminRegistryPage() {
                 <th>Name</th>
                 <th>Description</th>
                 <th>Link</th>
-                <th>Claimed By</th>
+                <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -199,12 +199,12 @@ export function AdminRegistryPage() {
                       '—'
                     )}
                   </td>
-                  <td>{gift.claimed_by || '—'}</td>
+                  <td>{gift.claimed_at ? 'Claimed' : 'Unclaimed'}</td>
                   <td className="admin-table-actions">
                     <button type="button" onClick={() => openEditForm(gift)}>
                       Edit
                     </button>
-                    {gift.claimed_by && (
+                    {gift.claimed_at && (
                       <button type="button" onClick={() => handleUnclaim(gift)}>
                         Unclaim
                       </button>

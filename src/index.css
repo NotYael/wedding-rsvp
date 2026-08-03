@@ -6,6 +6,22 @@
   --heading: 'Gaegu', cursive;
   --sans: 'Gaegu', cursive;
 
+  /* Guest one-page site */
+  --olive: #4c421c;
+  --cream: #e9d6be;
+  --ink: #2a1114;
+  --rust: #a24015;
+  --orange: #782c0a;
+  --brown: #3b2515;
+  --script: 'Imperial Script', cursive;
+  --ui: 'Montserrat', sans-serif;
+  --ui-alt: 'Albert Sans', sans-serif;
+  --nav-h: 56px;
+
+  @media (max-width: 768px) {
+    --nav-h: 48px;
+  }
+
   font: 18px/145% var(--sans);
   letter-spacing: 0.18px;
   color: var(--text);

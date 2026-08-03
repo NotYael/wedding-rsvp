@@ -7,9 +7,7 @@ export function RegistryPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [claimingId, setClaimingId] = useState(null)
-  const [claimName, setClaimName] = useState('')
   const [claimError, setClaimError] = useState('')
-  const [claiming, setClaiming] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -52,29 +50,15 @@ export function RegistryPage() {
     }
   }, [])
 
-  const startClaim = (gift) => {
+  const claimGift = async (gift) => {
     setClaimingId(gift.id)
-    setClaimName('')
-    setClaimError('')
-  }
-
-  const cancelClaim = () => {
-    setClaimingId(null)
-    setClaimName('')
-    setClaimError('')
-  }
-
-  const submitClaim = async (event, gift) => {
-    event.preventDefault()
-    setClaiming(true)
     setClaimError('')
 
     const { error: claimErr } = await supabase.rpc('claim_gift', {
       gift_id: gift.id,
-      claimer_name: claimName.trim(),
     })
 
-    setClaiming(false)
+    setClaimingId(null)
 
     if (claimErr) {
       if (claimErr.message?.includes('already_claimed')) {
@@ -82,30 +66,26 @@ export function RegistryPage() {
       } else {
         setClaimError('Something went wrong. Please try again.')
       }
-      return
     }
-
-    setClaimingId(null)
-    setClaimName('')
   }
 
   return (
     <div className="gift-registry">
       <div className="gift-registry-header">
-        <h2>Gift Registry</h2>
+        <h2>Wedding Registry</h2>
         <p className="gift-registry-note">
-          To claim a gift, please enter your FULL NAME. Names are only visible to the wedding planners and the
-          couple — you'll remain anonymous to everyone else. Claimed gifts will appear with a strikethrough.
+          Tap Claim to reserve a gift for the couple. Claimed gifts will appear with a strikethrough.
         </p>
       </div>
 
       {loading && <p className="status-message">Loading gift registry…</p>}
       {error && <p className="login-error">{error}</p>}
+      {claimError && <p className="login-error">{claimError}</p>}
 
       {!loading && !error && (
         <ul className="gift-list">
           {gifts.map((gift) => {
-            const isClaimed = Boolean(gift.claimed_by)
+            const isClaimed = Boolean(gift.claimed_at)
             return (
               <li key={gift.id} className={`gift-item${isClaimed ? ' claimed' : ''}`}>
                 <div className="gift-item-details">
@@ -118,32 +98,10 @@ export function RegistryPage() {
                   )}
                 </div>
 
-                {!isClaimed && claimingId !== gift.id && (
-                  <button type="button" onClick={() => startClaim(gift)}>
-                    Claim
+                {!isClaimed && (
+                  <button type="button" disabled={claimingId === gift.id} onClick={() => claimGift(gift)}>
+                    {claimingId === gift.id ? 'Claiming…' : 'Claim'}
                   </button>
-                )}
-
-                {!isClaimed && claimingId === gift.id && (
-                  <form className="gift-claim-form" onSubmit={(event) => submitClaim(event, gift)}>
-                    <input
-                      type="text"
-                      placeholder="Your name"
-                      required
-                      value={claimName}
-                      onChange={(event) => setClaimName(event.target.value)}
-                      autoFocus
-                    />
-                    <div className="gift-claim-actions">
-                      <button type="submit" disabled={claiming}>
-                        {claiming ? 'Claiming…' : 'Confirm'}
-                      </button>
-                      <button type="button" onClick={cancelClaim}>
-                        Cancel
-                      </button>
-                    </div>
-                    {claimError && <p className="login-error">{claimError}</p>}
-                  </form>
                 )}
 
                 {isClaimed && <span className="gift-claimed-tag">Claimed</span>}

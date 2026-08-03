@@ -1,15 +1,21 @@
 import { useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/authContext'
 import { RoleGate } from '../components/RoleGate'
-import { PasscodeForm } from '../components/PasscodeForm'
+import { GuestLogin } from '../components/GuestLogin'
 import { GuestNav } from '../components/GuestNav'
 import { GUEST_EMAIL } from '../lib/authConstants'
+import '../styles/home.css'
 
 export function GuestLayout() {
   const { signIn, signOut } = useAuth()
+  const { pathname } = useLocation()
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+
+  // The home page is a full-bleed snap-scrolling stack that renders its own
+  // <main>, so it skips the padded, centred app-shell the other pages use.
+  const isHome = pathname === '/'
 
   const handleSubmit = async (passcode) => {
     setSubmitting(true)
@@ -24,12 +30,7 @@ export function GuestLayout() {
   return (
     <RoleGate
       expectedRole="guest"
-      loginForm={
-        <main className="app-shell">
-          <h1>Wedding RSVP</h1>
-          <PasscodeForm onSubmit={handleSubmit} error={error} submitting={submitting} />
-        </main>
-      }
+      loginForm={<GuestLogin onSubmit={handleSubmit} error={error} submitting={submitting} />}
       mismatchContent={
         <main className="app-shell">
           <p>
@@ -39,9 +40,13 @@ export function GuestLayout() {
       }
     >
       <GuestNav onLogout={signOut} />
-      <main className="app-shell guest-page">
+      {isHome ? (
         <Outlet />
-      </main>
+      ) : (
+        <main className="app-shell guest-page">
+          <Outlet />
+        </main>
+      )}
     </RoleGate>
   )
 }

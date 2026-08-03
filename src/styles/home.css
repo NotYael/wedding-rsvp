@@ -1,0 +1,1089 @@
+/* ---------------------------------------------------------------
+   Guest one-page site: fixed nav + snap-scrolling stack of cards.
+
+   Mechanic: cards are sticky siblings sharing one tall parent, so each
+   one pins at the top while the next scrolls up and covers it. Snap
+   points live on zero-height markers between them, and snapping is
+   `proximity` so the page can still rest mid-transition. Below 768px the
+   stack is turned off entirely and cards flow normally -- sticky plus a
+   card taller than the screen (the RSVP form) is bad on phones.
+   --------------------------------------------------------------- */
+
+/* ---------- nav ---------- */
+
+.guest-nav {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  height: var(--nav-h);
+  padding: 0 128px;
+  background: var(--cream);
+  font-family: var(--ui);
+}
+
+.guest-nav-brand,
+.guest-nav-link {
+  font-family: var(--ui);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.guest-nav-brand {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.guest-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 70px;
+}
+
+.guest-nav-link {
+  border: none;
+  background: none;
+  padding: 0.25rem 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+  opacity: 0.65;
+  transition: opacity 120ms ease;
+
+  &:hover,
+  &:focus-visible {
+    opacity: 1;
+  }
+
+  &[aria-current='true'] {
+    opacity: 1;
+    text-decoration-thickness: 2px;
+  }
+}
+
+/* 70px x4 plus the wordmark stops fitting well before the phone breakpoint. */
+@media (max-width: 1400px) {
+  .guest-nav-links {
+    gap: 36px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .guest-nav {
+    padding: 0 32px;
+  }
+
+  .guest-nav-links {
+    gap: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .guest-nav {
+    padding: 0 16px;
+    gap: 0.5rem;
+  }
+
+  .guest-nav-brand,
+  .guest-nav-link {
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+
+  .guest-nav-links {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .guest-nav-brand {
+    display: none;
+  }
+}
+
+/* ---------- shell ---------- */
+
+/* The nav is fixed rather than sticky now, so the other guest pages need to
+   clear it themselves. Over-specific on purpose: App.css sets padding on
+   `.app-shell.guest-page` and is imported after this file. */
+main.app-shell.guest-page {
+  padding-top: calc(var(--nav-h) + 2.5rem);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---------- the stack ---------- */
+
+/* Snapping is on the document, not on a nested scroller. A nested scroller
+   puts a second scrollbar inside the layout instead of at the window edge. */
+/* `proximity`, not `mandatory`. Mandatory forbids the page from ever resting
+   between two snap points, so every gesture gets yanked to a card edge from
+   roughly the halfway mark -- that is the fighting sensation. Proximity leaves
+   a dead zone in the middle: a small scroll settles back onto the card you
+   were on, and only once the next card has most of the way covered it does the
+   release complete the transition.
+
+   `scroll-behavior: smooth` is deliberately NOT set here. As a global it also
+   governs snap adjustments and anchor jumps, so a snap could fire mid-animation
+   during a nav click and abort it. The nav passes `behavior: 'smooth'` per call
+   instead, which is the only place we actually want an animated scroll. */
+html.home-snap {
+  scroll-snap-type: y proximity;
+  background: var(--olive);
+}
+
+html.home-snap body {
+  background: var(--olive);
+}
+
+.home-stack {
+  display: block;
+  background: var(--olive);
+}
+
+/* Zero-height snap target sitting at each card's layout position. See
+   StackCard.jsx for why the cards themselves cannot carry the snap point. */
+.snap-point {
+  display: block;
+  height: 0;
+  scroll-snap-align: start;
+}
+
+.stack-card {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  background: var(--olive);
+  color: var(--cream);
+  font-family: var(--ui);
+  font-weight: 400;
+  text-align: left;
+}
+
+/* every card but the hero lifts over the one beneath it */
+.stack-card:not(:first-of-type) {
+  box-shadow: 0 -24px 48px rgba(0, 0, 0, 0.45);
+}
+
+/* A card whose content cannot fit one screen opts out of sticky and simply
+   grows. It still covers the cards before it -- later siblings paint on top --
+   and the card after it goes back to sticking. This is how the page avoids
+   ever needing a nested scrollbar. */
+.stack-card--tall {
+  position: relative;
+  height: auto;
+  min-height: 100dvh;
+}
+
+.stack-card-inner {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: calc(var(--nav-h) + 56px) 128px 56px;
+}
+
+.stack-card-body {
+  width: 100%;
+  max-width: 62rem;
+  margin: 0 auto;
+}
+
+@media (max-width: 1100px) {
+  .stack-card-inner {
+    padding: calc(var(--nav-h) + 40px) 32px 40px;
+  }
+}
+
+/* Very short viewports: card internals scale with vh, but past this point
+   there is nothing left to give, so cards grow instead of clipping. */
+@media (max-height: 600px) {
+  .stack-card {
+    position: relative;
+    height: auto;
+    min-height: 100dvh;
+  }
+}
+
+/* Phones: no sticky, no snap, natural document flow. */
+@media (max-width: 768px) {
+  html.home-snap {
+    scroll-snap-type: none;
+  }
+
+  /* svh, not dvh: dvh tracks the mobile URL bar, so every collapse/expand
+     would resize all five cards and shift the content under the reader's
+     finger mid-scroll. svh is the stable bar-visible height. */
+  .stack-card {
+    position: static;
+    height: auto;
+    min-height: 100svh;
+  }
+
+  .stack-card:not(:first-of-type) {
+    box-shadow: none;
+    border-top: 1px solid rgba(233, 214, 190, 0.25);
+  }
+
+  .stack-card-inner {
+    padding: calc(var(--nav-h) + 32px) 20px 48px;
+  }
+}
+
+/* ---------- hero ---------- */
+
+.hero-card .stack-card-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 2rem;
+}
+
+.hero-names {
+  margin: 0;
+  color: var(--cream);
+  font-family: var(--script);
+  font-size: clamp(3.5rem, 18vw, 176px);
+  font-weight: 400;
+  line-height: 70%;
+  letter-spacing: normal;
+  /* Imperial Script has long descenders/swashes that 70% line-height clips */
+  padding: 0.12em 0 0.18em;
+}
+
+.hero-tagline {
+  margin: 0;
+  color: var(--cream);
+  font-family: var(--ui);
+  font-size: clamp(0.85rem, 2.5vw, 24px);
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: 2.4px;
+  text-transform: uppercase;
+}
+
+.hero-mark {
+  width: clamp(150px, 28vw, 273px);
+  height: auto;
+}
+
+/* ---------- guest login (the hero, with a form for a tagline) ---------- */
+
+.guest-login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  min-height: 100dvh;
+  padding: 2rem 20px;
+  background: var(--olive);
+  color: var(--cream);
+  font-family: var(--ui);
+  text-align: center;
+}
+
+/* Every selector below is prefixed with `.guest-login .login-form` on purpose:
+   App.css styles the same form for the admin login and is imported after this
+   file, so matching its specificity would lose the cascade. */
+.guest-login .login-form {
+  align-items: center;
+  gap: 1rem;
+  max-width: 22rem;
+}
+
+.guest-login .login-form label {
+  font-family: var(--ui);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--cream);
+  opacity: 0.8;
+}
+
+.guest-login .login-form input {
+  font-family: var(--ui);
+  font-size: 1.05rem;
+  font-weight: 300;
+  letter-spacing: 2px;
+  text-align: center;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(233, 214, 190, 0.45);
+  border-radius: 0;
+  padding: 0.5rem 3.75rem 0.5rem 3.75rem;
+  color: var(--cream);
+}
+
+.guest-login .login-form input:focus {
+  outline: none;
+  border-bottom-color: var(--cream);
+}
+
+.guest-login .login-form .passcode-toggle {
+  font-family: var(--ui);
+  font-size: 0.7rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--cream);
+  opacity: 0.75;
+}
+
+.guest-login .login-form .passcode-toggle:hover {
+  background: transparent;
+  opacity: 1;
+}
+
+.guest-login .login-form button[type='submit'] {
+  font-family: var(--ui);
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 0.7rem 1rem;
+  background: var(--cream);
+  color: var(--olive);
+}
+
+.guest-login .login-error {
+  font-family: var(--ui);
+  font-size: 0.8rem;
+  color: #e2a09a;
+}
+
+/* ---------- details card (cream, two venue rows) ---------- */
+
+.details-card {
+  background: var(--cream);
+  color: var(--rust);
+}
+
+/* This card carries the most content of any in the stack and still has to fit
+   one screen, so its internals are sized in vh and shrink together as the
+   viewport gets shorter. The spec values are the upper bound of each clamp. */
+.details-card .stack-card-inner {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(2rem, 11vh, 7rem);
+  /* 128px measured from the top of the card, per the spec. The fixed nav
+     overlays the first 56px of that, so this still clears it. */
+  padding: clamp(40px, 10vh, 128px) 148px;
+}
+
+/* The rows sit in a fixed measure rather than filling the padding box. Without
+   this the two columns drift apart on a wide monitor and the artwork ends up
+   stranded in the middle of its own half. */
+.details-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(1.5rem, 4vw, 4rem);
+  width: 100%;
+  max-width: 1040px;
+  margin-inline: auto;
+}
+
+.details-art {
+  /* 460.032px and 86/63 per the spec. The vh term is what keeps two rows of
+     artwork inside one screen -- at 48vh wide the art is ~35vh tall, so the
+     pair plus the gap and padding lands just under 100vh. */
+  width: min(460.032px, 100%, 48vh);
+  aspect-ratio: 86 / 63;
+  height: auto;
+  align-self: center;
+  justify-self: center;
+  /* The artwork is a photo-style PNG on a white ground wrapped in an SVG.
+     Multiplying it against the cream drops the white out and keeps the line
+     work. The SVG's own `plus-darker` blend has patchy browser support and
+     does nothing at all when the file is loaded through an <img>. */
+  mix-blend-mode: multiply;
+}
+
+.details-title {
+  margin: 0 0 clamp(14px, 2.5vh, 24px);
+  color: var(--olive);
+  font-family: var(--script);
+  font-size: clamp(2.5rem, 10vh, 96px);
+  font-weight: 400;
+  line-height: 70%;
+  padding: 0.1em 0 0.16em;
+}
+
+.details-block + .details-block {
+  margin-top: clamp(14px, 2.5vh, 24px);
+}
+
+.details-label {
+  margin: 0 0 0.4rem;
+  color: var(--rust);
+  font-family: var(--ui);
+  font-size: clamp(0.75rem, 1.7vh, 16px);
+  font-weight: 500;
+  line-height: normal;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+}
+
+.details-value {
+  margin: 0;
+  color: var(--rust);
+  font-family: var(--ui);
+  font-size: clamp(1rem, 2.5vh, 24px);
+  font-weight: 500;
+  line-height: 1.25;
+  text-transform: uppercase;
+
+  /* Each line is its own span so the venue and address break exactly where the
+     design breaks them, rather than wherever the column happens to run out. */
+  span {
+    display: block;
+  }
+}
+
+.details-address {
+  margin-top: clamp(0.7rem, 1.8vh, 1.25rem);
+}
+
+@media (max-width: 1100px) {
+  .details-card .stack-card-inner {
+    padding: clamp(40px, 6vh, 96px) 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .details-card .stack-card-inner {
+    padding: calc(var(--nav-h) + 32px) 20px 48px;
+    gap: 3rem;
+  }
+
+  .details-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Art always follows its own text once the row collapses. */
+  .details-row .details-art {
+    order: 2;
+  }
+}
+
+/* ---------- attire card (orange, figures left / copy right) ---------- */
+
+.attire-card {
+  background: var(--orange);
+  color: var(--cream);
+}
+
+.attire-card .stack-card-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(40px, 13.4vh, 128px) clamp(20px, 6vw, 256px);
+}
+
+.attire-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(1.5rem, 4vw, 4rem);
+  width: 100%;
+  max-width: 960px;
+}
+
+.attire-figures {
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(8px, 1.5vw, 20px);
+}
+
+.attire-art {
+  /* Sized by height so the two figures line up; each keeps its own width. The
+     spec's 185.079 x 525 / 49:63 describes the man, and the woman is natively
+     180 wide -- forcing both to one width would stretch her by ~3%. */
+  height: min(525px, 55vh);
+  width: auto;
+  /* These files are light line work on a black ground, blended with `screen`.
+     An SVG loaded through an <img> renders isolated, so its internal blend has
+     no page backdrop to work against and has to be reapplied here. */
+  mix-blend-mode: screen;
+}
+
+.attire-text {
+  text-align: right;
+}
+
+.attire-title {
+  margin: 0 0 clamp(40px, 15.5vh, 148px);
+  color: var(--cream);
+  font-family: var(--script);
+  font-size: clamp(2.5rem, 10vh, 96px);
+  font-weight: 400;
+  line-height: 70%;
+  padding: 0.1em 0 0.16em;
+}
+
+.attire-group + .attire-group {
+  margin-top: clamp(24px, 6.7vh, 64px);
+}
+
+.attire-group-label {
+  margin: 0 0 clamp(12px, 2.5vh, 24px);
+  color: var(--cream);
+  font-family: var(--ui);
+  font-size: clamp(1rem, 2.5vh, 24px);
+  font-weight: 700;
+  line-height: normal;
+  text-transform: uppercase;
+}
+
+.attire-group-value {
+  margin: 0;
+  color: var(--cream);
+  font-family: var(--ui);
+  font-size: clamp(1rem, 2.5vh, 24px);
+  font-weight: 500;
+  line-height: 1.25;
+  text-transform: uppercase;
+
+  span {
+    display: block;
+  }
+}
+
+@media (max-width: 768px) {
+  .attire-row {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 2.5rem;
+  }
+
+  .attire-art {
+    height: min(380px, 40vh);
+  }
+
+  .attire-text {
+    text-align: center;
+  }
+}
+
+/* ---------- section headings + copy ---------- */
+
+.card-heading {
+  margin: 0 0 1.5rem;
+  color: var(--cream);
+  font-family: var(--script);
+  font-size: clamp(3rem, 8vw, 88px);
+  font-weight: 400;
+  line-height: 70%;
+  padding: 0.1em 0 0.16em;
+}
+
+.card-lede {
+  margin: 0 0 2rem;
+  max-width: 44rem;
+  color: var(--cream);
+  font-family: var(--ui);
+  font-size: clamp(1rem, 2vw, 1.15rem);
+  font-weight: 300;
+  line-height: 1.7;
+}
+
+/* ---------- FAQs (native details/summary, no JS) ---------- */
+
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid rgba(233, 214, 190, 0.3);
+}
+
+.faq-item {
+  border-bottom: 1px solid rgba(233, 214, 190, 0.3);
+
+  summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.1rem 0;
+    cursor: pointer;
+    list-style: none;
+    font-family: var(--ui);
+    font-size: clamp(0.95rem, 2vw, 1.05rem);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    &::after {
+      content: '+';
+      font-size: 1.4rem;
+      line-height: 1;
+      flex: 0 0 auto;
+    }
+  }
+
+  &[open] summary::after {
+    content: '\2013';
+  }
+
+  p {
+    margin: 0;
+    padding: 0 0 1.1rem;
+    max-width: 44rem;
+    font-family: var(--ui);
+    font-weight: 300;
+    line-height: 1.7;
+    opacity: 0.85;
+  }
+}
+
+.card-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(233, 214, 190, 0.3);
+  font-family: var(--ui);
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+
+  a {
+    color: var(--cream);
+    text-underline-offset: 4px;
+  }
+}
+
+
+/* ---------- RSVP card (cream, intro left / form right) ----------
+
+   `.rsvp-form` and `.rsvp-success` are also styled in App.css, which is
+   imported after this file, so those two selectors are scoped under
+   `.rsvp-card` to outrank it. The rest of the names here are unique. */
+
+.rsvp-card {
+  background: var(--cream);
+  color: var(--brown);
+}
+
+.rsvp-card .stack-card-inner {
+  padding: clamp(48px, 13.4vh, 128px) clamp(20px, 8vw, 128px);
+}
+
+.rsvp-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 64px;
+  width: 100%;
+  max-width: 1184px;
+  margin-inline: auto;
+}
+
+/* ---- left column ---- */
+
+/* This card grows rather than being pinned to one screen, so the left column
+   scales on viewport width -- there is no height to fit into. */
+.rsvp-title {
+  margin: 0 0 60px;
+  color: var(--brown);
+  font-family: var(--script);
+  font-size: clamp(4rem, 9vw, 128px);
+  font-weight: 400;
+  /* line-height: normal per the spec -- the font's own metrics clear the
+     descenders, so this needs none of the padding the 70% headings use. */
+  line-height: normal;
+}
+
+.rsvp-lede {
+  margin: 0 0 1.5rem;
+  max-width: 28rem;
+  color: var(--brown);
+  font-family: var(--ui);
+  font-size: clamp(1.05rem, 1.7vw, 24px);
+  font-weight: 400;
+  line-height: normal;
+  text-transform: uppercase;
+
+  strong {
+    color: var(--olive);
+    font-weight: 700;
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* ---- right column: the form ---- */
+
+.rsvp-card .rsvp-form {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  max-width: none;
+  text-align: left;
+}
+
+.rsvp-events,
+.rsvp-person {
+  display: flex;
+  flex-direction: column;
+  border: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.rsvp-events {
+  gap: 12px;
+}
+
+.rsvp-person {
+  gap: 24px;
+}
+
+.rsvp-question {
+  margin: 0 0 16px;
+  padding: 0;
+  color: var(--brown);
+  font-family: var(--ui);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 110%;
+  text-transform: uppercase;
+}
+
+.rsvp-check {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--brown);
+  font-family: var(--ui);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 110%;
+  text-transform: uppercase;
+  cursor: pointer;
+
+  input {
+    appearance: none;
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    display: grid;
+    place-content: center;
+    border: 1.5px solid var(--brown);
+    background: transparent;
+    cursor: pointer;
+  }
+
+  input:checked::after {
+    content: '';
+    width: 9px;
+    height: 9px;
+    background: var(--brown);
+  }
+
+  input:focus-visible {
+    outline: 2px solid var(--brown);
+    outline-offset: 2px;
+  }
+}
+
+.rsvp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.rsvp-field-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+}
+
+.rsvp-label {
+  color: var(--brown);
+  font-family: var(--ui);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 110%;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+}
+
+.rsvp-input {
+  width: 100%;
+  min-width: 0;
+  padding: 6px 0;
+  border: none;
+  border-bottom: 1px solid var(--brown);
+  border-radius: 0;
+  background: transparent;
+  color: var(--brown);
+  font-family: var(--ui);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 110%;
+  text-transform: uppercase;
+
+  /* opacity:1 is required -- Firefox dims placeholders by default, which
+     would compound with the 0.70 already in the colour. */
+  &::placeholder {
+    color: rgba(112, 66, 56, 0.7);
+    opacity: 1;
+  }
+
+  &:focus {
+    outline: none;
+    border-bottom-width: 2px;
+    padding-bottom: 5px;
+  }
+}
+
+.rsvp-input--invalid {
+  border-bottom-color: #b3261e;
+}
+
+/* Small inline text actions: copy the primary email, remove a guest. */
+.rsvp-text-button {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--brown);
+  font-family: var(--ui);
+  font-size: 12px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  opacity: 0.7;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    opacity: 1;
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+    text-decoration: none;
+  }
+}
+
+/* Same-events / different-events segmented control. */
+.rsvp-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  button {
+    padding: 8px 16px;
+    border: 1px solid var(--brown);
+    background: transparent;
+    color: var(--brown);
+    font-family: var(--ui);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  button[aria-pressed='true'] {
+    background: var(--brown);
+    color: var(--cream);
+  }
+}
+
+/* Stacked with the same 12px rhythm as the party-level .rsvp-events group, so
+   an added guest's checkboxes read identically to the first block. */
+.rsvp-check-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.rsvp-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 18px 24px;
+  border: none;
+  background: var(--brown);
+  color: var(--cream);
+  font-family: var(--ui-alt);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 110%;
+  text-transform: uppercase;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+}
+
+.rsvp-error {
+  margin: 0;
+  color: #b3261e;
+  font-family: var(--ui);
+  font-size: 14px;
+}
+
+.rsvp-card .rsvp-success {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.5rem;
+  max-width: none;
+  color: var(--brown);
+  font-family: var(--ui);
+  font-size: clamp(0.95rem, 1.5vw, 20px);
+  font-weight: 500;
+  text-transform: uppercase;
+  text-align: left;
+
+  p {
+    margin: 0;
+    width: auto;
+  }
+
+  .rsvp-button {
+    width: auto;
+    padding-inline: 32px;
+  }
+}
+
+@media (max-width: 900px) {
+  .rsvp-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 40px;
+  }
+
+  .rsvp-title {
+    margin-bottom: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .rsvp-card .stack-card-inner {
+    padding: calc(var(--nav-h) + 32px) 20px 48px;
+  }
+
+  .rsvp-field-pair {
+    gap: 16px;
+  }
+}
+
+/* ---------- thank-you card (brown, centred sign-off) ---------- */
+
+.thanks-card {
+  background: var(--brown);
+  color: var(--cream);
+}
+
+/* space-between, matching the two `Auto` gaps in the spec: the kicker pins to
+   the top inset, the sign-off to the bottom, and the headline takes the slack
+   between them. */
+.thanks-card .stack-card-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(24px, 6vh, 64px);
+  padding: clamp(48px, 13.7vh, 140px) clamp(20px, 7vw, 102px);
+  text-align: center;
+}
+
+.thanks-kicker {
+  margin: 0;
+  color: var(--cream);
+  font-family: var(--ui);
+  font-size: clamp(0.8rem, 2.4vh, 24px);
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: 2.4px;
+  text-transform: uppercase;
+}
+
+.thanks-headline {
+  margin: 0;
+  /* An em-based measure, so the line always breaks after "to" the way the
+     design does -- the break depends on the ratio of column width to type
+     size, and em holds that ratio steady as the heading scales.
+     "We look forward to" is ~5.8em wide and "...to celebrating" ~9em, so
+     anything in between forces exactly the intended break. */
+  max-width: 7em;
+  color: var(--cream);
+  font-family: var(--script);
+  /* Constrained by height and width both: this card is pinned to one screen,
+     but 176px also has to physically fit across a narrow window. */
+  font-size: clamp(2.5rem, min(17vh, 13vw), 176px);
+  font-weight: 400;
+  line-height: 100%;
+  /* line-height 100% is tighter than Imperial Script's own metrics, so the
+     block needs a little room or the swashes clip top and bottom. */
+  padding: 0.08em 0 0.14em;
+}
+
+.thanks-signoff {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.thanks-signature {
+  width: clamp(48px, 6.5vh, 69px);
+  height: auto;
+}
+
+@media (max-width: 768px) {
+  .thanks-card .stack-card-inner {
+    padding: calc(var(--nav-h) + 40px) 20px 56px;
+    gap: clamp(28px, 6vh, 48px);
+  }
+
+  .thanks-headline {
+    font-size: clamp(2.25rem, 13vw, 96px);
+  }
+}
