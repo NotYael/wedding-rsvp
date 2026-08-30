@@ -91,12 +91,122 @@
   font-size: 0.9rem;
 }
 
-.auth-status {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* ---------- loading screen ---------- */
+
+/* Lives here rather than home.css because the admin route mounts RoleGate too
+   and never imports that file. Two rows, not a centred flex column: the help
+   note has to sit near the bottom without ever overlapping the wordmark on a
+   short screen. */
+.loading-screen {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  justify-items: center;
   min-height: 100svh;
-  color: var(--text);
+  padding: 2rem 20px;
+  background: var(--olive);
+  color: var(--cream);
+  font-family: var(--ui);
+  text-align: center;
+}
+
+.loading-screen-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1rem, 3vh, 1.75rem);
+  place-self: center;
+}
+
+.loading-mark {
+  width: clamp(120px, 22vw, 200px);
+  height: auto;
+  animation: loading-breathe 2.8s ease-in-out infinite;
+}
+
+/* Same face and metrics as .hero-names, a size down -- this screen is a
+   stop on the way to the site, not the arrival. */
+.loading-names {
+  margin: 0;
+  color: var(--cream);
+  font-family: var(--script);
+  font-size: clamp(2.75rem, 12vw, 116px);
+  font-weight: 400;
+  line-height: 70%;
+  letter-spacing: normal;
+  /* Imperial Script has long descenders/swashes that 70% line-height clips */
+  padding: 0.12em 0 0.18em;
+}
+
+.loading-label {
+  font-size: clamp(0.7rem, 2.2vw, 0.8rem);
+  font-weight: 400;
+  letter-spacing: 2.4px;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.loading-rule {
+  display: block;
+  width: min(220px, 55vw);
+  height: 1px;
+  margin: 1rem auto 0;
+  overflow: hidden;
+  background: rgba(233, 214, 190, 0.28);
+
+  &::after {
+    content: '';
+    display: block;
+    width: 40%;
+    height: 100%;
+    background: var(--cream);
+    animation: loading-sweep 1.7s ease-in-out infinite;
+  }
+}
+
+.loading-help {
+  max-width: 30rem;
+  padding-top: 1.5rem;
+  color: rgba(233, 214, 190, 0.65);
+  font-size: clamp(0.7rem, 2vw, 0.78rem);
+  font-weight: 300;
+  line-height: 1.7;
+  letter-spacing: 0.6px;
+}
+
+@keyframes loading-breathe {
+  0%,
+  100% {
+    opacity: 0.7;
+    transform: translateY(0);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes loading-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(250%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-mark {
+    opacity: 1;
+    animation: none;
+  }
+
+  .loading-rule::after {
+    width: 100%;
+    opacity: 0.5;
+    animation: none;
+  }
 }
 
 .status-message {
@@ -139,8 +249,10 @@
   border-radius: 0.5rem;
   white-space: nowrap;
 
-  &:hover {
-    background: var(--border);
+  @media (hover: hover) {
+    &:hover {
+      background: var(--border);
+    }
   }
 
   &.active {
@@ -161,228 +273,6 @@
   width: 100%;
   max-width: 32rem;
   text-align: left;
-}
-
-.gift-registry {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
-  width: 100%;
-  max-width: 32rem;
-}
-
-.gift-registry-header {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.gift-registry-note {
-  color: #c76b63;
-  font-size: 0.9rem;
-}
-
-.contact-note {
-  width: 100%;
-  max-width: 32rem;
-  margin-top: 0.5rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--border);
-  color: var(--text);
-  font-size: 0.85rem;
-  text-align: center;
-}
-
-.gift-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  width: 100%;
-  padding: 0;
-  margin: 0;
-  list-style: none;
-  text-align: left;
-}
-
-.gift-item {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  border: 1px solid var(--border);
-  border-radius: 0.75rem;
-  padding: 1.1rem 1.25rem;
-
-  &.claimed {
-    opacity: 0.6;
-
-    .gift-name,
-    .gift-description {
-      text-decoration: line-through;
-    }
-  }
-}
-
-.gift-item-details {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-
-.gift-name {
-  font-weight: 600;
-  color: var(--text-h);
-}
-
-.gift-description {
-  font-size: 0.9rem;
-  color: var(--text);
-}
-
-.gift-link {
-  font-size: 0.85rem;
-  color: var(--text-h);
-}
-
-.gift-claim-form {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.5rem;
-
-  input {
-    font: inherit;
-    padding: 0.5rem 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: 0.5rem;
-    background: #fff;
-    color: var(--text-h);
-  }
-
-  @media (max-width: 480px) {
-    width: 100%;
-    align-items: stretch;
-  }
-}
-
-.gift-claim-actions {
-  display: flex;
-  gap: 0.5rem;
-
-  button {
-    font: inherit;
-    padding: 0.5rem 0.9rem;
-    border-radius: 0.5rem;
-    cursor: pointer;
-  }
-
-  button[type='submit'] {
-    border: none;
-    background: var(--text-h);
-    color: var(--bg);
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: default;
-    }
-  }
-
-  button[type='button'] {
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--text);
-  }
-}
-
-.gift-claimed-tag {
-  flex: 0 0 auto;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 0.3rem 0.75rem;
-}
-
-.gift-item > button {
-  flex: 0 0 auto;
-  font: inherit;
-  padding: 0.6rem 1.1rem;
-  border: none;
-  border-radius: 0.5rem;
-  background: var(--text-h);
-  color: var(--bg);
-  cursor: pointer;
-}
-
-.page-content {
-  width: 100%;
-  max-width: 40rem;
-  text-align: left;
-
-  h1,
-  h2,
-  h3 {
-    font-family: var(--heading);
-    color: var(--text-h);
-    margin: 1.25rem 0 0.5rem;
-  }
-
-  h1:first-child,
-  h2:first-child,
-  h3:first-child {
-    margin-top: 0;
-  }
-
-  p {
-    max-width: none;
-    margin: 0.75rem 0;
-  }
-
-  ul,
-  ol {
-    margin: 0.75rem 0;
-    padding-left: 1.5rem;
-  }
-
-  li {
-    margin: 0.25rem 0;
-  }
-
-  a {
-    color: var(--text-h);
-  }
-
-  blockquote {
-    margin: 0.75rem 0;
-    padding: 0.5rem 1rem;
-    border-left: 3px solid var(--border);
-    color: var(--text);
-  }
-
-  table {
-    display: block;
-    width: 100%;
-    max-width: fit-content;
-    overflow-x: auto;
-    border-collapse: collapse;
-    margin: 0.75rem 0;
-  }
-
-  th,
-  td {
-    padding: 0.5rem 0.75rem;
-    border: 1px solid var(--border);
-    text-align: left;
-  }
-
-  hr {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 1.5rem 0;
-  }
 }
 
 .person-fields {
@@ -534,8 +424,10 @@ input.field-invalid {
   color: var(--text);
   cursor: pointer;
 
-  &:hover {
-    background: var(--border);
+  @media (hover: hover) {
+    &:hover {
+      background: var(--border);
+    }
   }
 }
 
@@ -556,20 +448,6 @@ input.field-invalid {
 
   @media (max-width: 640px) {
     padding: 1rem;
-  }
-}
-
-.admin-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
-  flex: 0 0 auto;
-
-  h1 {
-    font-size: clamp(1.75rem, 3vw, 2.5rem);
-    margin: 0;
   }
 }
 
@@ -622,8 +500,14 @@ input.field-invalid {
     color: var(--text-h);
     cursor: pointer;
 
-    &:hover {
-      background: var(--border);
+    /* Pointer only. A touch device applies :hover on tap and holds it until you
+       tap elsewhere, so this fill would outlive the press -- and admin.css uses
+       a fill of its own to mean "party highlighting is on", which a stuck hover
+       would forge. */
+    @media (hover: hover) {
+      &:hover {
+        background: var(--border);
+      }
     }
   }
 }
@@ -680,8 +564,10 @@ input.field-invalid {
     border-bottom: 1px solid var(--border);
   }
 
-  tbody tr:hover {
-    filter: brightness(0.97);
+  @media (hover: hover) {
+    tbody tr:hover {
+      filter: brightness(0.97);
+    }
   }
 }
 
@@ -712,134 +598,6 @@ input.field-invalid {
   }
 }
 
-.gift-admin-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  max-width: 28rem;
-  margin-bottom: 1.25rem;
-  padding: 1.25rem;
-  border: 1px solid var(--border);
-  border-radius: 0.75rem;
-  flex: 0 0 auto;
-
-  label {
-    font-size: 0.85rem;
-    color: var(--text);
-  }
-
-  input,
-  textarea {
-    font: inherit;
-    padding: 0.6rem 0.9rem;
-    border: 1px solid var(--border);
-    border-radius: 0.5rem;
-    background: #fff;
-    color: var(--text-h);
-    resize: vertical;
-  }
-
-  button {
-    align-self: flex-start;
-    font: inherit;
-    padding: 0.6rem 1.1rem;
-    border: none;
-    border-radius: 0.5rem;
-    background: var(--text-h);
-    color: var(--bg);
-    cursor: pointer;
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: default;
-    }
-  }
-}
-
-.page-editor {
-  display: flex;
-  gap: 1.5rem;
-  flex: 1 1 auto;
-  min-height: 0;
-
-  @media (max-width: 900px) {
-    flex-direction: column;
-  }
-}
-
-.page-editor-pane {
-  flex: 1 1 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  min-height: 0;
-}
-
-.page-editor-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  min-height: 2.75rem;
-
-  label,
-  .page-editor-toolbar-label {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-h);
-  }
-}
-
-.page-editor-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-
-  button {
-    font: inherit;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 0.5rem;
-    background: var(--text-h);
-    color: var(--bg);
-    cursor: pointer;
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: default;
-    }
-  }
-}
-
-.page-editor-saved {
-  font-size: 0.8rem;
-  color: var(--text);
-}
-
-.page-editor-textarea {
-  flex: 1 1 auto;
-  min-height: 0;
-  resize: none;
-  font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  padding: 1rem;
-  border: 1px solid var(--border);
-  border-radius: 0.75rem;
-  background: #fff;
-  color: var(--text-h);
-}
-
-.page-editor-preview {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: auto;
-  padding: 1rem 1.25rem;
-  border: 1px solid var(--border);
-  border-radius: 0.75rem;
-  background: #fff;
-}
-
 .admin-export-actions {
   display: flex;
   flex-wrap: wrap;
@@ -856,134 +614,10 @@ input.field-invalid {
     color: var(--bg);
     cursor: pointer;
 
-    &:hover {
-      opacity: 0.9;
+    @media (hover: hover) {
+      &:hover {
+        opacity: 0.9;
+      }
     }
-  }
-}
-
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  background: rgba(31, 23, 32, 0.45);
-
-  @media (max-width: 640px) {
-    padding: 0.75rem;
-  }
-}
-
-.modal-panel {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  max-width: 48rem;
-  max-height: 85vh;
-  background: var(--bg);
-  border-radius: 0.75rem;
-  box-shadow: 0 20px 50px rgba(31, 23, 32, 0.25);
-  overflow: hidden;
-}
-
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--border);
-  flex: 0 0 auto;
-
-  h2 {
-    font-family: var(--heading);
-    color: var(--text-h);
-    font-size: 1.4rem;
-    margin: 0;
-  }
-}
-
-.modal-close {
-  font-size: 1.5rem;
-  line-height: 1;
-  padding: 0.25rem 0.6rem;
-  border: none;
-  border-radius: 0.5rem;
-  background: transparent;
-  color: var(--text);
-  cursor: pointer;
-
-  &:hover {
-    background: var(--border);
-  }
-}
-
-.modal-body {
-  padding: 1.5rem;
-  overflow-y: auto;
-  text-align: left;
-}
-
-.markdown-guide {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.markdown-guide-row {
-  display: grid;
-  grid-template-columns: 8rem 1fr 1fr;
-  gap: 1rem;
-  align-items: start;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--border);
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  @media (max-width: 640px) {
-    grid-template-columns: 1fr;
-    gap: 0.35rem;
-  }
-}
-
-.markdown-guide-row-head {
-  font-weight: 600;
-  color: var(--text-h);
-  border-bottom: 1px solid var(--text-h);
-}
-
-.markdown-guide-label {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-h);
-}
-
-.markdown-guide-syntax {
-  font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
-  font-size: 0.8rem;
-  white-space: pre-wrap;
-  word-break: break-word;
-  margin: 0;
-  padding: 0.5rem 0.65rem;
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 0.4rem;
-  color: var(--text-h);
-}
-
-.markdown-guide-preview {
-  font-size: 0.9rem;
-
-  p:first-child {
-    margin-top: 0;
-  }
-
-  p:last-child {
-    margin-bottom: 0;
   }
 }

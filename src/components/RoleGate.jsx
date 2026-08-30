@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useAuth } from '../context/authContext'
+import { LoadingScreen } from './LoadingScreen'
 
 export function RoleGate({
   expectedRole,
@@ -21,7 +22,7 @@ export function RoleGate({
   }, [mismatched, forceSignOutOnMismatch])
 
   if (loading) {
-    return <p className="auth-status">Loading…</p>
+    return <LoadingScreen />
   }
 
   if (!session) {
@@ -29,7 +30,7 @@ export function RoleGate({
   }
 
   if (mismatched) {
-    return forceSignOutOnMismatch ? <p className="auth-status">Signing out…</p> : mismatchContent
+    return forceSignOutOnMismatch ? <LoadingScreen label="Signing out" /> : mismatchContent
   }
 
   return children

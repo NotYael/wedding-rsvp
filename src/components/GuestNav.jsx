@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
 const HOME_SECTIONS = [
@@ -9,6 +9,10 @@ const HOME_SECTIONS = [
 ]
 
 const TRACKED_IDS = ['hero', ...HOME_SECTIONS.map((section) => section.id)]
+
+// Matches the breakpoint in home.css where the links give way to the burger.
+// Kept as one string so the two cannot drift apart.
+const MOBILE_QUERY = '(max-width: 640px)'
 
 const scrollToSection = (id) => {
   const target = document.getElementById(id)
@@ -25,6 +29,13 @@ export function GuestNav({ onLogout }) {
   const { pathname } = useLocation()
   const isHome = pathname === '/'
   const [activeId, setActiveId] = useState('hero')
+  const [menuOpen, setMenuOpen] = useState(false)
+  /* The section to jump to once the menu has closed. Scrolling straight from
+     the click would fire while the page is still locked and covered. A ref
+     rather than state: it is read by the effect that closes out the gesture,
+     never rendered, and clearing it must not cost a second render. */
+  const pendingScrollRef = useRef(null)
+  const toggleRef = useRef(null)
 
   useEffect(() => {
     if (!isHome) return undefined
@@ -61,38 +72,141 @@ export function GuestNav({ onLogout }) {
     }
   }, [isHome])
 
+  /* The page behind the sheet must not scroll. html is the scroller here, not
+     body -- home.css puts the snap points on it. */
+  useEffect(() => {
+    if (!menuOpen) return undefined
+    const root = document.documentElement
+    const previous = root.style.overflow
+    root.style.overflow = 'hidden'
+    return () => {
+      root.style.overflow = previous
+    }
+  }, [menuOpen])
+
+  /* Escape closes, and focus goes back to the burger it came from. */
+  useEffect(() => {
+    if (!menuOpen) return undefined
+    const onKeyDown = (event) => {
+      if (event.key !== 'Escape') return
+      setMenuOpen(false)
+      toggleRef.current?.focus()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [menuOpen])
+
+  /* Rotating to landscape or dragging a desktop window narrow-to-wide takes the
+     burger away with the media query. Without this the sheet would stay over
+     the page with nothing left on screen to close it. */
+  useEffect(() => {
+    if (!menuOpen) return undefined
+    const query = window.matchMedia(MOBILE_QUERY)
+    const onChange = () => {
+      if (!query.matches) setMenuOpen(false)
+    }
+    query.addEventListener('change', onChange)
+    return () => query.removeEventListener('change', onChange)
+  }, [menuOpen])
+
+  /* Effect cleanups all run before effect bodies within a commit, so the scroll
+     lock above is already lifted by the time this fires. */
+  useEffect(() => {
+    if (menuOpen) return
+    const id = pendingScrollRef.current
+    if (!id) return
+    pendingScrollRef.current = null
+    scrollToSection(id)
+  }, [menuOpen])
+
   const handleBrandClick = useCallback(() => scrollToSection('hero'), [])
 
+  const handleSectionClick = useCallback((id) => {
+    pendingScrollRef.current = id
+    setMenuOpen(false)
+  }, [])
+
   return (
-    <nav className="guest-nav">
-      {isHome ? (
-        <button type="button" className="guest-nav-brand" onClick={handleBrandClick}>
-          Marco &amp; Alessandra
+    <>
+      <nav className="guest-nav">
+        {isHome ? (
+          <button type="button" className="guest-nav-brand" onClick={handleBrandClick}>
+            Marco &amp; Alessandra
+          </button>
+        ) : (
+          <Link to="/" className="guest-nav-brand">
+            Marco &amp; Alessandra
+          </Link>
+        )}
+
+        <div className="guest-nav-links">
+          {isHome &&
+            HOME_SECTIONS.map((section) => (
+              <button
+                key={section.id}
+                type="button"
+                className="guest-nav-link"
+                aria-current={activeId === section.id}
+                onClick={() => scrollToSection(section.id)}
+              >
+                {section.label}
+              </button>
+            ))}
+
+          <button type="button" className="guest-nav-link" onClick={onLogout}>
+            Log out
+          </button>
+        </div>
+
+        {/* A disclosure rather than a dialog: `aria-modal` would hide everything
+            outside the sheet, and this button -- the only way to close it --
+            sits outside, on top of the sheet in the bar. */}
+        <button
+          type="button"
+          ref={toggleRef}
+          className="guest-nav-toggle"
+          aria-expanded={menuOpen}
+          aria-controls="guest-nav-menu"
+          onClick={() => setMenuOpen((open) => !open)}
+        >
+          <span className="guest-nav-toggle-bars" aria-hidden="true">
+            <span className="guest-nav-toggle-bar" />
+            <span className="guest-nav-toggle-bar" />
+            <span className="guest-nav-toggle-bar" />
+          </span>
+          <span className="visually-hidden">{menuOpen ? 'Close menu' : 'Open menu'}</span>
         </button>
-      ) : (
-        <Link to="/" className="guest-nav-brand">
-          Marco &amp; Alessandra
-        </Link>
+      </nav>
+
+      {menuOpen && (
+        <div id="guest-nav-menu" className="guest-nav-menu">
+          <div className="guest-nav-menu-links">
+            {isHome &&
+              HOME_SECTIONS.map((section) => (
+                <button
+                  key={section.id}
+                  type="button"
+                  className="guest-nav-menu-link"
+                  aria-current={activeId === section.id}
+                  onClick={() => handleSectionClick(section.id)}
+                >
+                  {section.label}
+                </button>
+              ))}
+          </div>
+
+          <button
+            type="button"
+            className="guest-nav-menu-logout"
+            onClick={() => {
+              setMenuOpen(false)
+              onLogout()
+            }}
+          >
+            Log out
+          </button>
+        </div>
       )}
-
-      <div className="guest-nav-links">
-        {isHome &&
-          HOME_SECTIONS.map((section) => (
-            <button
-              key={section.id}
-              type="button"
-              className="guest-nav-link"
-              aria-current={activeId === section.id}
-              onClick={() => scrollToSection(section.id)}
-            >
-              {section.label}
-            </button>
-          ))}
-
-        <button type="button" className="guest-nav-link" onClick={onLogout}>
-          Log out
-        </button>
-      </div>
-    </nav>
+    </>
   )
 }

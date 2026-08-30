@@ -62,14 +62,164 @@
   opacity: 0.65;
   transition: opacity 120ms ease;
 
-  &:hover,
   &:focus-visible {
     opacity: 1;
+  }
+
+  /* Pointer only. A tapped link keeps :hover until you tap elsewhere, so after
+     scrolling on past that section you would be looking at two links at full
+     opacity -- the one you last touched and the one actually current. */
+  @media (hover: hover) {
+    &:hover {
+      opacity: 1;
+    }
   }
 
   &[aria-current='true'] {
     opacity: 1;
     text-decoration-thickness: 2px;
+  }
+}
+
+/* ---------- burger + full-page menu ---------- */
+
+/* Hidden until the links give way to it at 640px. 44px square for the thumb,
+   with the overhang past the 16px gutter pulled back so the bars themselves --
+   not the padding around them -- line up with the edge of the content. */
+.guest-nav-toggle {
+  display: none;
+  position: relative;
+  width: 44px;
+  height: 44px;
+  margin-right: -11px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.guest-nav-toggle-bars {
+  position: absolute;
+  inset: 0;
+}
+
+/* Three hairlines at the weight of the rules used everywhere else on the site,
+   the outer two riding 6px off centre. Open, they fold onto the middle one's
+   line and cross; the middle one drops out underneath them. */
+.guest-nav-toggle-bar {
+  position: absolute;
+  top: 50%;
+  left: 11px;
+  width: 22px;
+  height: 1.5px;
+  margin-top: -0.75px;
+  background: currentColor;
+  transition:
+    transform 200ms ease,
+    opacity 120ms ease;
+}
+
+.guest-nav-toggle-bar:nth-child(1) {
+  transform: translateY(-6px);
+}
+
+.guest-nav-toggle-bar:nth-child(3) {
+  transform: translateY(6px);
+}
+
+.guest-nav-toggle[aria-expanded='true'] .guest-nav-toggle-bar:nth-child(1) {
+  transform: rotate(45deg);
+}
+
+.guest-nav-toggle[aria-expanded='true'] .guest-nav-toggle-bar:nth-child(2) {
+  opacity: 0;
+}
+
+.guest-nav-toggle[aria-expanded='true'] .guest-nav-toggle-bar:nth-child(3) {
+  transform: rotate(-45deg);
+}
+
+/* Cream on cream, sitting one layer under the bar (z-index 20) rather than over
+   it: the sheet covers the page while the wordmark and the burger stay put, so
+   opening it reads as the bar growing to fill the screen rather than as a panel
+   dropped on top of one. The X is then still there to close it. */
+.guest-nav-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 19;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+  padding: calc(var(--nav-h) + 2rem) 24px 2.5rem;
+  background: var(--cream);
+  font-family: var(--ui);
+  animation: guest-nav-menu-in 180ms ease-out;
+}
+
+@keyframes guest-nav-menu-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.guest-nav-menu-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.75rem;
+}
+
+/* The bar's links one size up and stripped of their underline: at this scale
+   the rule under every item would read as a stack of lines, so only the section
+   you are on keeps one. */
+.guest-nav-menu-link {
+  border: none;
+  background: none;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  color: var(--ink);
+  font-family: var(--ui);
+  font-size: clamp(20px, 6.5vw, 26px);
+  font-weight: 400;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-decoration: none;
+  opacity: 0.65;
+}
+
+.guest-nav-menu-link[aria-current='true'] {
+  opacity: 1;
+  text-decoration: underline;
+  text-underline-offset: 8px;
+  text-decoration-thickness: 2px;
+}
+
+/* Not one of the four places to go, so it is set apart and quieter. */
+.guest-nav-menu-logout {
+  border: none;
+  background: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  color: var(--ink);
+  font-family: var(--ui);
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+  opacity: 0.55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guest-nav-toggle-bar {
+    transition: none;
+  }
+
+  .guest-nav-menu {
+    animation: none;
   }
 }
 
@@ -105,11 +255,48 @@
   .guest-nav-links {
     gap: 10px;
   }
+
+  /* 12px type leaves a ~14px-tall target against the 44px minimum. The text is
+     not moved: an overlay pseudo-element grows the hit area alone, so the row
+     still looks exactly the same but is reachable with a thumb. 44px clears the
+     48px bar, and the 10px gap keeps neighbouring targets from overlapping. */
+  .guest-nav-brand,
+  .guest-nav-link {
+    position: relative;
+  }
+
+  .guest-nav-brand::after,
+  .guest-nav-link::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 0;
+    left: 0;
+    height: 44px;
+    transform: translateY(-50%);
+  }
 }
 
-@media (max-width: 480px) {
-  .guest-nav-brand {
+/* Four links at 10px apart is the last honest fit; below this the row starts
+   crowding the wordmark, so it folds into the burger and the sheet behind it.
+   Keep in step with MOBILE_QUERY in GuestNav.jsx, which closes the sheet when
+   the viewport grows back past this point and takes the burger away. */
+@media (max-width: 640px) {
+  .guest-nav-links {
     display: none;
+  }
+
+  .guest-nav-toggle {
+    display: block;
+  }
+
+  /* Room freed by the links goes back into the wordmark, which is now the only
+     thing sharing the bar with the burger -- and which was hidden outright
+     below 480px before there was a burger to make room for it. At 14px the
+     full names plus the 44px burger still clear a 320px screen. */
+  .guest-nav-brand {
+    font-size: 14px;
+    letter-spacing: 1.5px;
   }
 }
 
@@ -574,6 +761,17 @@ html.home-snap body {
   }
 }
 
+/* The figures are sized by height inside a flex row, so between the two-column
+   breakpoint and 1100px their combined natural width -- 186 + 180 plus the gap
+   -- outgrows the column they sit in. Flex then shrinks them, and because the
+   height is explicit, shrinking distorts them instead of scaling them down.
+   Capping on vw keeps the pair inside the column. */
+@media (max-width: 1100px) {
+  .attire-art {
+    height: min(525px, 55vh, 42vw);
+  }
+}
+
 @media (max-width: 768px) {
   .attire-row {
     grid-template-columns: minmax(0, 1fr);
@@ -585,8 +783,25 @@ html.home-snap body {
     height: min(380px, 40vh);
   }
 
+  /* The two groups run side by side with the title spanning above them. Stacked,
+     the title's own bottom margin plus two full-width groups push this card well
+     past one screen on a phone. */
   .attire-text {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 1.5rem;
+    justify-self: stretch;
     text-align: center;
+  }
+
+  .attire-title {
+    grid-column: 1 / -1;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Siblings in a row now, so the stacked rhythm would only push them apart. */
+  .attire-group + .attire-group {
+    margin-top: 0;
   }
 }
 
@@ -614,37 +829,72 @@ html.home-snap body {
 
 /* ---------- FAQs (native details/summary, no JS) ---------- */
 
+/* The questions run wider than the 62rem the other cards use -- two columns of
+   24px text need the room -- and the card opts out of sticky via
+   `stack-card--tall`, because open answers can push it past one screen. */
+.faqs-card .stack-card-body {
+  max-width: 74rem;
+}
+
+.faqs-card .card-heading {
+  margin-bottom: 3.5rem;
+  font-size: clamp(3rem, 8vw, 96px);
+  text-align: center;
+}
+
+/* Two independent stacks, not one grid of items. A grid ties the two items
+   sharing a row to the same row height, so opening a question on the left
+   drags the right-hand column down with it. See FaqsCard.jsx. */
 .faq-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  column-gap: 2rem;
+  row-gap: 2.75rem;
+}
+
+.faq-column {
   display: flex;
   flex-direction: column;
-  border-top: 1px solid rgba(233, 214, 190, 0.3);
+  gap: 2.75rem;
 }
 
 .faq-item {
-  border-bottom: 1px solid rgba(233, 214, 190, 0.3);
+  border-bottom: 1px solid var(--cream);
 
   summary {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
-    padding: 1.1rem 0;
+    gap: 1.5rem;
+    padding: 0 0 0.85rem;
+    /* Two lines of question text (2 x the 120% line-height) plus the padding
+       above. The columns are independent stacks, so nothing lines them up on
+       its own; giving every question the same floor makes a one-line question
+       occupy the height of a two-line one, which is what keeps the rows level
+       across the two columns. A one-liner centres in the space it is given. */
+    min-height: calc(2.4em + 0.85rem);
     cursor: pointer;
     list-style: none;
+    color: var(--cream);
     font-family: var(--ui);
-    font-size: clamp(0.95rem, 2vw, 1.05rem);
-    font-weight: 500;
-    letter-spacing: 0.5px;
+    font-size: clamp(1rem, 1.5vw, 24px);
+    font-weight: 700;
+    line-height: 120%;
+    text-transform: uppercase;
 
     &::-webkit-details-marker {
       display: none;
     }
 
+    /* summary is the flex container here, so its ::after is a flex item and
+       stays centred against a question that wraps onto a second line. */
     &::after {
       content: '+';
-      font-size: 1.4rem;
-      line-height: 1;
       flex: 0 0 auto;
+      font-size: 1.6em;
+      font-weight: 400;
+      line-height: 1;
     }
   }
 
@@ -654,33 +904,32 @@ html.home-snap body {
 
   p {
     margin: 0;
-    padding: 0 0 1.1rem;
-    max-width: 44rem;
-    font-family: var(--ui);
-    font-weight: 300;
-    line-height: 1.7;
-    opacity: 0.85;
-  }
-}
-
-.card-footer-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
-  margin-top: 2.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(233, 214, 190, 0.3);
-  font-family: var(--ui);
-  font-size: 0.8rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-
-  a {
+    padding: 0.35rem 0 0.85rem;
     color: var(--cream);
-    text-underline-offset: 4px;
+    font-family: var(--ui);
+    font-size: clamp(1rem, 1.5vw, 24px);
+    font-weight: 400;
+    line-height: 120%;
+    text-transform: uppercase;
   }
 }
 
+/* One column: the two stacks sit end to end, so the row-gap between them has to
+   match the gap inside them or the seam shows as a wider space. */
+@media (max-width: 900px) {
+  .faq-list {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 1.75rem;
+  }
+
+  .faq-column {
+    gap: 1.75rem;
+  }
+
+  .faqs-card .card-heading {
+    margin-bottom: 2.5rem;
+  }
+}
 
 /* ---------- RSVP card (cream, intro left / form right) ----------
 
@@ -1004,13 +1253,70 @@ html.home-snap body {
   }
 }
 
+/* The card is `stack-card--tall`, so it is allowed to grow past one screen and
+   nothing here breaks if it does. But on a phone the desktop type -- a 64px
+   title, 24px buttons, 20px questions -- pushed the submit button a screen and
+   a half down, so the whole card steps down together.
+
+   16px is a hard floor for `.rsvp-input`, not a taste call: iOS Safari zooms the
+   page when a focused field is smaller than that, and the zoom does not undo
+   itself, so the guest is left fighting a shifted layout halfway through
+   filling the form. Labels and questions are free to go smaller -- they are
+   never focused. */
 @media (max-width: 768px) {
   .rsvp-card .stack-card-inner {
-    padding: calc(var(--nav-h) + 32px) 20px 48px;
+    padding: calc(var(--nav-h) + 24px) 20px 32px;
   }
 
   .rsvp-field-pair {
     gap: 16px;
+  }
+
+  .rsvp-title {
+    margin-bottom: 20px;
+    font-size: clamp(2.5rem, 11vw, 3.5rem);
+  }
+
+  .rsvp-lede {
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+  }
+
+  .rsvp-layout {
+    gap: 28px;
+  }
+
+  .rsvp-card .rsvp-form {
+    gap: 24px;
+  }
+
+  .rsvp-person {
+    gap: 16px;
+  }
+
+  .rsvp-question {
+    margin-bottom: 12px;
+    font-size: 16px;
+  }
+
+  .rsvp-check {
+    font-size: 16px;
+  }
+
+  .rsvp-label {
+    font-size: 13px;
+    letter-spacing: 1.2px;
+  }
+
+  .rsvp-input {
+    font-size: 16px;
+  }
+
+  /* 17px also pulls "RSVP for another person" back onto one line, which is
+     worth another ~30px on its own. */
+  .rsvp-button {
+    padding: 14px 20px;
+    font-size: 17px;
   }
 }
 

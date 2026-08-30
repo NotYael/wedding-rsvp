@@ -5,6 +5,7 @@ import { RoleGate } from '../components/RoleGate'
 import { PasscodeForm } from '../components/PasscodeForm'
 import { AdminNav } from '../components/AdminNav'
 import { ADMIN_EMAIL } from '../lib/authConstants'
+import '../styles/admin.css'
 
 export function AdminLayout() {
   const { signIn, signOut } = useAuth()
@@ -29,9 +30,14 @@ export function AdminLayout() {
       forceSignOutOnMismatch
       onForcedSignOut={handleForcedSignOut}
       loginForm={
-        <main className="app-shell">
-          <h1>Wedding RSVP — Admin</h1>
+        /* The guest door one size down: same wordmark and passcode field, with
+           an eyebrow instead of the couple illustration to mark it as the
+           other entrance. */
+        <main className="admin-login">
+          <p className="admin-login-eyebrow">Admin</p>
+          <h1 className="admin-login-names">Marco &amp; Alessandra</h1>
           <PasscodeForm onSubmit={handleSubmit} error={error} submitting={submitting} />
+          <img className="admin-login-mark" src="/signature.svg" alt="" width="69" height="64" />
         </main>
       }
     >
