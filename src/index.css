@@ -3,8 +3,8 @@
   --text-h: #1f1720;
   --bg: #fbf7f5;
   --border: #e8ddd8;
-  --heading: 'Gaegu', cursive;
-  --sans: 'Gaegu', cursive;
+  --heading: 'Gaegu', 'Comic Sans MS', cursive;
+  --sans: 'Gaegu', 'Comic Sans MS', cursive;
 
   /* Guest one-page site */
   --olive: #15221f;
@@ -13,9 +13,12 @@
   --rust: #a24015;
   --orange: #782c0a;
   --brown: #3b2515;
-  --script: 'Imperial Script', cursive;
-  --ui: 'Montserrat', sans-serif;
-  --ui-alt: 'Albert Sans', sans-serif;
+  /* Named script faces ahead of the generic keyword: bare `cursive`
+     resolves to Comic Sans MS on Windows, which is what made the
+     pre-load hero read as the old Gaegu wordmark. */
+  --script: 'Imperial Script', 'Segoe Script', 'Snell Roundhand', cursive;
+  --ui: 'Montserrat', system-ui, sans-serif;
+  --ui-alt: 'Albert Sans', system-ui, sans-serif;
   --nav-h: 56px;
 
   @media (max-width: 768px) {

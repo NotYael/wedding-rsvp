@@ -1,0 +1,125 @@
+/* ---------------------------------------------------------------
+   Self-hosted webfonts.
+
+   These used to come from a <link> to fonts.googleapis.com, which cost
+   two serial cross-origin round trips before a single glyph existed:
+   the HTML had to fetch and parse Google's stylesheet just to learn the
+   fonts.gstatic.com URLs. On a cold load the page therefore always
+   painted before the fonts arrived, and `display=swap` filled the gap
+   with each family's fallback -- for `--script` that is the browser's
+   default `cursive`, i.e. Comic Sans MS on Windows, which reads as the
+   old Gaegu wordmark at hero size.
+
+   Serving the .woff2 from our own origin removes the round trips, and
+   index.html preloads the two faces that paint immediately.
+
+   Latin subsets only -- the site has no Korean, Vietnamese or Cyrillic
+   text, and Gaegu in particular ships ~90 Korean subsets we never touch.
+   Roman only, too: nothing in the CSS asks for italics.
+   --------------------------------------------------------------- */
+
+/* ---------- Imperial Script -- the script wordmark (--script) ---------- */
+
+/* `block` rather than `swap`: this is a display face used only for the
+   couple's names. A beat of invisible text is better than flashing a
+   stand-in handwriting font at 176px. It is preloaded, so in practice
+   the block period ends before first paint. */
+@font-face {
+  font-family: 'Imperial Script';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('/fonts/imperial-script-400-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Imperial Script';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('/fonts/imperial-script-400-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* ---------- Montserrat -- body and nav (--ui) ---------- */
+
+/* Variable file: one download covers 300-700, where the old link element
+   requested five separate static weights. `swap` because this is running
+   text, which must stay readable even if the font never arrives. */
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url('/fonts/montserrat-var-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url('/fonts/montserrat-var-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* ---------- Albert Sans -- the RSVP submit button (--ui-alt) ---------- */
+
+/* Not preloaded: one button, below the fold. */
+@font-face {
+  font-family: 'Albert Sans';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/fonts/albert-sans-var-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Albert Sans';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/fonts/albert-sans-var-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* ---------- Gaegu -- admin chrome only (--heading, --sans) ---------- */
+
+/* Only the signed-in admin views reference these, so nothing here is
+   preloaded and the guest site never requests the files. */
+@font-face {
+  font-family: 'Gaegu';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/gaegu-400-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Gaegu';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/gaegu-700-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
