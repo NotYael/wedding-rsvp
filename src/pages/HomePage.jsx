@@ -7,12 +7,13 @@ import { FaqsCard } from '../components/home/FaqsCard'
 import { ThanksCard } from '../components/home/ThanksCard'
 
 export function HomePage() {
-  // Snap lives on the document rather than a nested container: a nested
-  // scroller gives the page a second scrollbar sitting inside the layout.
+  // The stack's dark ground has to reach the overscroll area above and below
+  // the document, and only html/body paint there -- hence a class on the
+  // document element, scoped to this page and removed on the way out.
   useEffect(() => {
     const root = document.documentElement
-    root.classList.add('home-snap')
-    return () => root.classList.remove('home-snap')
+    root.classList.add('home-stack-page')
+    return () => root.classList.remove('home-stack-page')
   }, [])
 
   return (

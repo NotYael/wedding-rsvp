@@ -18,11 +18,19 @@ const scrollToSection = (id) => {
   const target = document.getElementById(id)
   if (!target) return
 
-  // Smooth is requested per call rather than via a global `scroll-behavior`,
-  // so it applies to nav clicks only and never to the browser's own snap
-  // adjustments. Readers who ask for reduced motion get an instant jump.
+  // offsetTop, not scrollIntoView. The cards are sticky, so a pinned one sits at
+  // the top of the viewport and reports a rect of top:0 however far down the
+  // page we are -- scrollIntoView then decides it is already in place and does
+  // nothing, which killed every backwards jump. offsetTop is the card's layout
+  // position, unaffected by pinning, and it is document-relative here because
+  // body has no margin and nothing between it and the cards is positioned. The
+  // active-link effect below measures the same way, so the two agree.
+  //
+  // Smooth is requested per call rather than via a global `scroll-behavior`, so
+  // it applies to nav clicks only and not to anchor jumps or any other
+  // programmatic scroll. Readers who ask for reduced motion get an instant jump.
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  target.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' })
+  window.scrollTo({ top: target.offsetTop, behavior: reducedMotion ? 'auto' : 'smooth' })
 }
 
 export function GuestNav({ onLogout }) {
@@ -72,8 +80,8 @@ export function GuestNav({ onLogout }) {
     }
   }, [isHome])
 
-  /* The page behind the sheet must not scroll. html is the scroller here, not
-     body -- home.css puts the snap points on it. */
+  /* The page behind the sheet must not scroll. html is the scroller, not body,
+     so the lock has to go on the document element. */
   useEffect(() => {
     if (!menuOpen) return undefined
     const root = document.documentElement

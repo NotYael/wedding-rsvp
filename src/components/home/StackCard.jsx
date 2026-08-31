@@ -6,19 +6,16 @@
  * tall parent -- that is what lets card N stay pinned while card N+1 scrolls up
  * and covers it.
  *
- * The snap point is a zero-height marker in front of the card rather than the
- * card itself. A sticky element's snap area is measured after it has been
- * stuck, so a pinned card's snap point rides along with the scroll position and
- * the browser never lets you leave it. The marker stays in normal flow at the
- * card's layout position, which is the position we actually want to snap to.
+ * A pinned card sits at the top of the viewport, so it reports a bounding rect
+ * of top:0 no matter how far down the page has scrolled. Anything that needs a
+ * card's real position on the page has to read `offsetTop` instead; see
+ * GuestNav.jsx, which does exactly that for both the nav jumps and the
+ * active-link highlight.
  */
 export function StackCard({ id, className = '', children }) {
   return (
-    <>
-      <span className="snap-point" aria-hidden="true" />
-      <section id={id} className={`stack-card ${className}`.trim()} aria-labelledby={`${id}-heading`}>
-        <div className="stack-card-inner">{children}</div>
-      </section>
-    </>
+    <section id={id} className={`stack-card ${className}`.trim()} aria-labelledby={`${id}-heading`}>
+      <div className="stack-card-inner">{children}</div>
+    </section>
   )
 }

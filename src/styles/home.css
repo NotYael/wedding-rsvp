@@ -1,10 +1,10 @@
 /* ---------------------------------------------------------------
-   Guest one-page site: fixed nav + snap-scrolling stack of cards.
+   Guest one-page site: fixed nav + a stack of cards.
 
    Mechanic: cards are sticky siblings sharing one tall parent, so each
-   one pins at the top while the next scrolls up and covers it. Snap
-   points live on zero-height markers between them, and snapping is
-   `proximity` so the page can still rest mid-transition. Below 768px the
+   one pins at the top while the next scrolls up and covers it. Scrolling
+   itself is left entirely to the browser -- see the note above
+   `.home-stack-page` for why there is no scroll snapping. Below 768px the
    stack is turned off entirely and cards flow normally -- sticky plus a
    card taller than the screen (the RSVP form) is bad on phones.
    --------------------------------------------------------------- */
@@ -322,39 +322,34 @@ main.app-shell.guest-page {
 
 /* ---------- the stack ---------- */
 
-/* Snapping is on the document, not on a nested scroller. A nested scroller
-   puts a second scrollbar inside the layout instead of at the window edge. */
-/* `proximity`, not `mandatory`. Mandatory forbids the page from ever resting
-   between two snap points, so every gesture gets yanked to a card edge from
-   roughly the halfway mark -- that is the fighting sensation. Proximity leaves
-   a dead zone in the middle: a small scroll settles back onto the card you
-   were on, and only once the next card has most of the way covered it does the
-   release complete the transition.
+/* Class on <html> rather than a wrapper: the page's ground colour has to reach
+   the overscroll area past the top and bottom of the document, and only html
+   and body paint there.
 
-   `scroll-behavior: smooth` is deliberately NOT set here. As a global it also
-   governs snap adjustments and anchor jumps, so a snap could fire mid-animation
-   during a nav click and abort it. The nav passes `behavior: 'smooth'` per call
-   instead, which is the only place we actually want an animated scroll. */
-html.home-snap {
-  scroll-snap-type: y proximity;
+   NO `scroll-snap-type` here, deliberately -- do not add it back. Snapping
+   re-decides the scroll position after every gesture *ends*, and a mouse wheel
+   emits one short gesture per notch. From a rested snap point a notch or two
+   lands well inside the browser's proximity threshold, so it gets pulled
+   straight back and the page appears frozen under the wheel. Touch never hit
+   this (one swipe is one long gesture) which is why it read as desktop-only.
+   The `--tall` cards make it worse still: a section the reader has to scroll
+   *inside* cannot also be a snap target.
+
+   `scroll-behavior: smooth` is deliberately NOT set here either. As a global it
+   governs anchor jumps and every programmatic scroll, including ones that
+   should be instant. The nav passes `behavior: 'smooth'` per call instead,
+   which is the only place we actually want an animated scroll. */
+html.home-stack-page {
   background: var(--olive);
 }
 
-html.home-snap body {
+html.home-stack-page body {
   background: var(--olive);
 }
 
 .home-stack {
   display: block;
   background: var(--olive);
-}
-
-/* Zero-height snap target sitting at each card's layout position. See
-   StackCard.jsx for why the cards themselves cannot carry the snap point. */
-.snap-point {
-  display: block;
-  height: 0;
-  scroll-snap-align: start;
 }
 
 .stack-card {
@@ -413,12 +408,8 @@ html.home-snap body {
   }
 }
 
-/* Phones: no sticky, no snap, natural document flow. */
+/* Phones: no sticky, natural document flow. */
 @media (max-width: 768px) {
-  html.home-snap {
-    scroll-snap-type: none;
-  }
-
   /* svh, not dvh: dvh tracks the mobile URL bar, so every collapse/expand
      would resize all five cards and shift the content under the reader's
      finger mid-scroll. svh is the stable bar-visible height. */

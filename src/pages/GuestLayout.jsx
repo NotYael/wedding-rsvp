@@ -13,7 +13,7 @@ export function GuestLayout() {
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  // The home page is a full-bleed snap-scrolling stack that renders its own
+  // The home page is a full-bleed scrolling stack that renders its own
   // <main>, so it skips the padded, centred app-shell the other pages use.
   const isHome = pathname === '/'
 
