@@ -213,19 +213,23 @@ export function GuestRsvpForm() {
         />
       ))}
 
-      <button type="button" className="rsvp-button rsvp-button--add" onClick={addPerson}>
-        <span aria-hidden="true">+</span> RSVP for another person
-      </button>
+      {/* The two buttons read as one block, so they sit closer together than
+          the form's section rhythm; the submit error belongs between them. */}
+      <div className="rsvp-actions">
+        <button type="button" className="rsvp-button rsvp-button--add" onClick={addPerson}>
+          <span aria-hidden="true">+</span> RSVP for another person
+        </button>
 
-      {error && (
-        <p className="rsvp-error" role="alert">
-          {error}
-        </p>
-      )}
+        {error && (
+          <p className="rsvp-error" role="alert">
+            {error}
+          </p>
+        )}
 
-      <button type="submit" className="rsvp-button" disabled={submitting}>
-        {submitting ? 'Submitting…' : 'Submit RSVP'}
-      </button>
+        <button type="submit" className="rsvp-button" disabled={submitting}>
+          {submitting ? 'Submitting…' : 'Submit RSVP'}
+        </button>
+      </div>
     </form>
   )
 }
