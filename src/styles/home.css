@@ -674,9 +674,10 @@ html.home-stack-page body {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  /* Art always follows its own text once the row collapses. */
+  /* Art leads its own text once the row collapses, so each venue reads
+     picture -> title -> details regardless of the desktop side it sits on. */
   .details-row .details-art {
-    order: 2;
+    order: -1;
   }
 }
 
