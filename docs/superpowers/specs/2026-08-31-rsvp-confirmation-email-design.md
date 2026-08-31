@@ -144,7 +144,7 @@ The endpoint is public and sends email from a verified domain, so an unprotected
 1. **Recipients come from the database, never the request body.** The request supplies only a `party_id`; the function looks up that party and emails the addresses on those rows. The endpoint is then physically incapable of emailing anyone not already in the guest list.
 2. **Require the guest session.** The client already holds a Supabase session (`AuthProvider`) with `app_metadata.role = 'guest'`. Send the access token as a bearer header and verify it server-side. Roughly five lines, and it rejects anonymous callers before the database is touched.
 
-`SUPABASE_SERVICE_ROLE_KEY` lives only in Vercel env vars and is referenced only inside `api/`. It must never appear in a `VITE_`-prefixed variable, which would ship it to the browser.
+`SUPABASE_SECRET_KEY` lives only in Vercel env vars and is referenced only inside `api/`. It must never appear in a `VITE_`-prefixed variable, which would ship it to the browser.
 
 The webhook endpoint verifies its Svix signature; without that, anyone could mark confirmations as delivered.
 
@@ -173,7 +173,7 @@ The handlers are thin enough to verify manually against a real send.
 | Name | Where | Notes |
 |---|---|---|
 | `RESEND_API_KEY` | Vercel env | Server-side only |
-| `SUPABASE_SERVICE_ROLE_KEY` | Vercel env | Server-side only, never `VITE_` |
+| `SUPABASE_SECRET_KEY` | Vercel env | Server-side only, never `VITE_` |
 | `RESEND_WEBHOOK_SECRET` | Vercel env | Svix signing secret |
 | From address | code | `Marco & Alessandra <rsvp@pookiesparty.com>` |
 

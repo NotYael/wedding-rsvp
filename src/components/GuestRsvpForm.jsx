@@ -17,6 +17,30 @@ function makePerson(id) {
 
 const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
 
+/**
+ * Ask the server to send confirmation emails for a party that was just saved.
+ *
+ * The RSVP is already in the database by the time this runs, so nothing here
+ * may surface to the guest -- they have seen the success screen, and a red
+ * banner after the fact is worse than a missing email. Failures are logged and
+ * show up as a missing confirmation in the admin table instead.
+ */
+async function sendConfirmation(partyId) {
+  try {
+    const { data } = await supabase.auth.getSession()
+    const token = data?.session?.access_token
+    if (!token) return
+
+    await fetch('/api/send-rsvp-confirmation', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
+      body: JSON.stringify({ partyId }),
+    })
+  } catch (error) {
+    console.error('Confirmation email request failed', error)
+  }
+}
+
 export function GuestRsvpForm() {
   const nextId = useRef(0)
   const formRef = useRef(null)
@@ -146,6 +170,9 @@ export function GuestRsvpForm() {
     setPeople([makePerson(0)])
     setFieldErrors({})
     setSuccess(true)
+
+    // Deliberately not awaited: the guest should not wait on an email.
+    sendConfirmation(partyId)
   }
 
   if (success) {

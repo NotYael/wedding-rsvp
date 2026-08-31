@@ -5,6 +5,18 @@ import { countActiveFilters, describeFilters, matchesFilters } from '../lib/gues
 import { AdminGuestFilters } from './AdminGuestFilters'
 import { StatCards } from './StatCards'
 
+/* Resend only keeps its own logs for 30 days, which is shorter than the RSVP
+   window, so the delivery outcome is mirrored onto the guest row. "Bounced" is
+   the one worth acting on: that guest thinks they are confirmed and never got
+   the details. */
+const CONFIRMATION_LABELS = {
+  sent: 'Sent',
+  delivered: 'Delivered',
+  bounced: 'Bounced ⚠',
+  complained: 'Marked as spam',
+  failed: 'Failed ⚠',
+}
+
 /* Translucent washes rather than the flat pastels this used to use. The table
    is cream text on #15221F now, so an opaque pastel fill would leave the row
    unreadable; at these alphas the hue still separates one party from the next
@@ -187,6 +199,7 @@ export function AdminGuestTable() {
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Dietary Restrictions</th>
+                <th>Confirmation</th>
                 <th>Submitted</th>
               </tr>
             </thead>
@@ -200,13 +213,14 @@ export function AdminGuestTable() {
                     <td>{guest.email}</td>
                     <td>{guest.phone}</td>
                     <td>{guest.dietary_restrictions || '—'}</td>
+                    <td>{CONFIRMATION_LABELS[guest.confirmation_status] ?? 'Not sent'}</td>
                     <td>{new Date(guest.created_at).toLocaleString()}</td>
                   </tr>
                 ))
               })}
               {filteredParties.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="admin-table-empty">
+                  <td colSpan={7} className="admin-table-empty">
                     No guests found.
                   </td>
                 </tr>

@@ -1,26 +1,5 @@
+import { VENUES } from '../../lib/eventDetails'
 import { StackCard } from './StackCard'
-
-const VENUES = [
-  {
-    title: 'Ceremony',
-    time: '3:30PM',
-    venue: ['Santuario de', 'San Antonio Parish'],
-    address: ['3117 McKinley Rd, Forbes Park,', 'Makati City'],
-    art: '/church.svg',
-    artWidth: 461,
-    artHeight: 337,
-  },
-  {
-    title: 'Reception',
-    time: '5:30PM',
-    venue: ['Manila Polo Club'],
-    address: ['35 McKinley Rd, Forbes Park,', 'Makati City'],
-    art: '/reception.svg',
-    artWidth: 421,
-    artHeight: 308,
-    artFirst: true,
-  },
-]
 
 function VenueText({ venue }) {
   return (
