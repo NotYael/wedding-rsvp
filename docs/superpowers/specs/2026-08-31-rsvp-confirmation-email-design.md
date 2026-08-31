@@ -1,7 +1,7 @@
 # RSVP Confirmation Email — Design
 
 **Date:** 2026-08-31
-**Status:** Approved, pending two config values (see Open Items)
+**Status:** Approved. Two content values ship as blank placeholders (see Placeholder Values).
 
 ## Goal
 
@@ -47,11 +47,18 @@ Consumed by both `DetailsCard.jsx` and the email renderer, so venue/time changes
 
 ```js
 export const COUPLE = 'Marco & Alessandra'
-export const WEDDING_DATE = '...'        // see Open Items
-export const CONTACT_PHONE = '...'       // see Open Items
 export const RSVP_DEADLINE = 'February 9, 2027'
 export const VENUES = [ /* moved verbatim from DetailsCard */ ]
+
+// TODO: fill in the wedding date before the first real send
+export const WEDDING_DATE = '______'
+
+// TODO: fill in the contact number for the confirmation email footer
+export const CONTACT_PHONE = '______'
 ```
+
+Both unset values are `______` so they are greppable, and both carry a `TODO`
+comment. Changing them later is a one-line edit in one file.
 
 ### `api/_lib/groupByEmail.js` (new)
 
@@ -157,6 +164,7 @@ The project has no test runner today. Vitest is a small addition given Vite is a
 
 - `groupByEmail` — the 1-email, 2-email, and 3-people-2-emails cases from the recipient rule above; case and whitespace normalization.
 - `renderConfirmation` — snapshot of subject/text for a one-person and a three-person group.
+- `eventDetails` — no exported value still contains a `______` placeholder (see Placeholder Values).
 
 The handlers are thin enough to verify manually against a real send.
 
@@ -182,7 +190,29 @@ Local development note: `vite dev` does not run Vercel Functions. Use `vercel de
 - Dietary restrictions and attire in the email body.
 - Reading history from Resend. Free-tier log retention is 30 days, shorter than the RSVP window, which is why status is mirrored into `guests` instead.
 
-## Open items
+## Placeholder values
 
-1. **Contact phone number** for the PSA footer.
-2. **The wedding date.** The codebase only contains an RSVP-by date of February 9, 2027 (`RsvpCard.jsx`), and `DetailsCard.jsx` has ceremony/reception times but no date. The email needs the actual wedding date.
+Two pieces of email content are not yet known and ship as `______` placeholders
+in `src/lib/eventDetails.js`:
+
+| Constant | What it is | Why it's blank |
+|---|---|---|
+| `WEDDING_DATE` | The date of the wedding | Not present anywhere in the codebase. `RsvpCard.jsx` has only the RSVP-by date of February 9, 2027; `DetailsCard.jsx` has ceremony/reception times but no date. |
+| `CONTACT_PHONE` | Number in the PSA footer | Not yet supplied. |
+
+Both are single-line edits in one file, marked with `TODO` and greppable as
+`______`.
+
+### Guard against shipping a placeholder
+
+A `______` reaching a guest's inbox is the failure mode worth preventing, and
+the PSA footer is the one part of the email that matters most when something has
+gone wrong. Two cheap guards:
+
+- A unit test asserting no exported value in `eventDetails.js` contains `______`,
+  skipped/expected-to-fail until the values are filled in.
+- `send-rsvp-confirmation.js` logs a warning when it renders an email containing
+  `______`, so a real send with placeholders is visible in Vercel's logs rather
+  than silent.
+
+Neither blocks development — they just make the omission loud.
