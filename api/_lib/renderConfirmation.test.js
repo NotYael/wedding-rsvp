@@ -117,22 +117,9 @@ describe('renderConfirmation', () => {
     const { html, text } = renderConfirmation(group(person('Ana Cruz')), details)
 
     expect(html).toContain('With love')
-    expect(html).toContain('signature.png')
+    expect(html).toContain('Marco &amp; Alessandra')
     expect(text).toContain('With love,')
     expect(text.trimEnd().endsWith('Marco & Alessandra')).toBe(true)
-  })
-
-  test('the signature image is absolutely addressed, since email has no origin', () => {
-    const { html } = renderConfirmation(group(person('Ana Cruz')), details)
-
-    expect(html).toMatch(/src="https:\/\/[^"]*signature\.png"/)
-  })
-
-  test('a blocked signature image still reads as the couple', () => {
-    const { html } = renderConfirmation(group(person('Ana Cruz')), details)
-    const img = html.match(/<img[^>]*signature\.png[^>]*>/)?.[0] ?? ''
-
-    expect(img).toContain('alt="Marco &amp; Alessandra"')
   })
 
   test('html special characters in a guest name cannot break out into markup', () => {

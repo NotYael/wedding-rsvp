@@ -31,10 +31,6 @@ const UI = "Montserrat,'Helvetica Neue',Helvetica,Arial,sans-serif"
 const SITE_ORIGIN = 'https://pookiesparty.com'
 const FONT_ORIGIN = `${SITE_ORIGIN}/fonts`
 
-/* A PNG, not the site's signature.svg: Gmail refuses to render SVG in email and
-   Outlook cannot either. Served at 3x so it stays crisp on a retina phone. */
-const SIGNATURE_SRC = `${SITE_ORIGIN}/signature.png`
-
 const escape = (value) =>
   String(value)
     .replace(/&/g, '&amp;')
@@ -174,7 +170,7 @@ export function renderConfirmation(group, details) {
           </td>
         </tr>
 
-        <!-- sign-off: the Thanks card -- brown, cream type, monogram, names -->
+        <!-- sign-off: the Thanks card -- brown card, cream type -->
         <tr>
           <td align="center" style="background:${BROWN};padding:34px 32px 38px;">
             <p style="margin:0 0 22px;font-family:${UI};font-size:13px;line-height:1.6;color:${CREAM};">
@@ -183,8 +179,6 @@ export function renderConfirmation(group, details) {
             </p>
 
             <p style="margin:0 0 20px;font-family:${SCRIPT};font-size:34px;line-height:1.15;color:${CREAM};">We look forward to celebrating with you.</p>
-
-            <img src="${SIGNATURE_SRC}" alt="${escape(couple)}" width="52" height="48" style="display:block;margin:0 auto 14px;width:52px;height:48px;border:0;outline:none;text-decoration:none;" />
 
             <p style="margin:0;font-family:${UI};font-size:11px;letter-spacing:2.4px;text-transform:uppercase;color:${CREAM};">
               With love, <span style="white-space:nowrap;">${escape(couple)}</span>
