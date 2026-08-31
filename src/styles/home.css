@@ -28,7 +28,7 @@
 .guest-nav-brand,
 .guest-nav-link {
   font-family: var(--ui);
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 400;
   line-height: normal;
   letter-spacing: 2px;
@@ -253,7 +253,7 @@
   }
 
   .guest-nav-links {
-    gap: 10px;
+    gap: 18px;
   }
 
   /* 12px type leaves a ~14px-tall target against the 44px minimum. The text is
@@ -1024,12 +1024,18 @@ html.home-stack-page body {
 /* ---- left column ---- */
 
 /* This card grows rather than being pinned to one screen, so the left column
-   scales on viewport width -- there is no height to fit into. */
+   scales on viewport width -- there is no height to fit into.
+
+   The heading is the exception: sized on width alone it fell behind every
+   other title on the page once the window narrowed, because the pinned cards
+   size their headings on height (`10vh`) and a tablet or phone is tall. `max`
+   takes whichever ramp is larger, so the title keeps its 9vw desktop size and
+   never drops below the neighbouring `.attire-title` on a narrow screen. */
 .rsvp-title {
   margin: 0 0 60px;
   color: var(--brown);
   font-family: var(--script);
-  font-size: clamp(4rem, 9vw, 128px);
+  font-size: clamp(3rem, max(9vw, 10vh), 128px);
   font-weight: 400;
   /* line-height: normal per the spec -- the font's own metrics clear the
      descenders, so this needs none of the padding the 70% headings use. */
@@ -1336,9 +1342,11 @@ html.home-stack-page body {
 }
 
 /* The card is `stack-card--tall`, so it is allowed to grow past one screen and
-   nothing here breaks if it does. But on a phone the desktop type -- a 64px
-   title, 24px buttons, 20px questions -- pushed the submit button a screen and
-   a half down, so the whole card steps down together.
+   nothing here breaks if it does. But on a phone the desktop type -- 24px
+   buttons, 20px questions -- pushed the submit button a screen and a half
+   down, so the form steps down together. The heading is deliberately left
+   out of that step-down: it is the one thing on the card that has to stay in
+   scale with the titles on the cards above and below it.
 
    16px is a hard floor for `.rsvp-input`, not a taste call: iOS Safari zooms the
    page when a focused field is smaller than that, and the zoom does not undo
@@ -1354,9 +1362,10 @@ html.home-stack-page body {
     gap: 16px;
   }
 
+  /* Size is left to the base rule so the heading tracks the other titles;
+     only the spacing below it steps down with the rest of the card. */
   .rsvp-title {
     margin-bottom: 20px;
-    font-size: clamp(2.5rem, 11vw, 3.5rem);
   }
 
   .rsvp-lede {
