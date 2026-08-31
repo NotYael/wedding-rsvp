@@ -14,7 +14,20 @@ const FAQS = [
   },
   {
     q: 'What gifts do you prefer?',
-    a: 'Your love and presence are more than enough.',
+    // Answers are rendered as-is, so a node is fine where one needs links.
+    a: (
+      <>
+        We have a registry in{' '}
+        <a href="https://rustans.com/pages/the-registry-by-rustans" target="_blank" rel="noreferrer">
+          Rustan&rsquo;s
+        </a>{' '}
+        and{' '}
+        <a href="https://giftregistry.crateandbarrel.com.ph/" target="_blank" rel="noreferrer">
+          Crate &amp; Barrel
+        </a>
+        . Gifts in kind will also be appreciated!
+      </>
+    ),
   },
   {
     q: "What happens if I can't attend after submitting my RSVP?",

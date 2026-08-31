@@ -902,6 +902,16 @@ html.home-stack-page body {
     font-weight: 400;
     line-height: 120%;
     text-transform: uppercase;
+
+    a {
+      color: inherit;
+      text-decoration: underline;
+      text-underline-offset: 0.2em;
+
+      &:hover {
+        opacity: 0.7;
+      }
+    }
   }
 }
 
