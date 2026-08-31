@@ -97,6 +97,22 @@ describe('renderConfirmation', () => {
     expect(html).toContain('<')
   })
 
+  test('a do-not-reply notice sits above everything else', () => {
+    const { html, text } = renderConfirmation(group(person('Ana Cruz')), details)
+
+    expect(html).toMatch(/do not reply/i)
+    expect(text).toMatch(/do not reply/i)
+    // "On top" -- ahead of the couple's name, which opens the letter proper.
+    expect(html.search(/do not reply/i)).toBeLessThan(html.indexOf('Marco'))
+  })
+
+  test('the notice points at the phone number, since replies go nowhere', () => {
+    const { html } = renderConfirmation(group(person('Ana Cruz')), details)
+
+    const notice = html.slice(0, html.search(/Marco/))
+    expect(notice).toContain('+63 917 555 0100')
+  })
+
   test('html special characters in a guest name cannot break out into markup', () => {
     const { html } = renderConfirmation(group(person('<script>alert(1)</script>')), details)
 
