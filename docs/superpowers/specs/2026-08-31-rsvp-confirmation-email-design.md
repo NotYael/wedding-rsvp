@@ -1,7 +1,7 @@
 # RSVP Confirmation Email — Design
 
 **Date:** 2026-08-31
-**Status:** Approved. Two content values ship as blank placeholders (see Placeholder Values).
+**Status:** Implemented. Contact phone is a test value pending the real number (see Placeholder Values).
 
 ## Goal
 
@@ -48,17 +48,10 @@ Consumed by both `DetailsCard.jsx` and the email renderer, so venue/time changes
 ```js
 export const COUPLE = 'Marco & Alessandra'
 export const RSVP_DEADLINE = 'February 9, 2027'
+export const WEDDING_DATE = 'April 9, 2027'
+export const CONTACT_PHONE = '123456789'   // TODO: test value, swap for the real number
 export const VENUES = [ /* moved verbatim from DetailsCard */ ]
-
-// TODO: fill in the wedding date before the first real send
-export const WEDDING_DATE = '______'
-
-// TODO: fill in the contact number for the confirmation email footer
-export const CONTACT_PHONE = '______'
 ```
-
-Both unset values are `______` so they are greppable, and both carry a `TODO`
-comment. Changing them later is a one-line edit in one file.
 
 ### `api/_lib/groupByEmail.js` (new)
 
@@ -192,27 +185,15 @@ Local development note: `vite dev` does not run Vercel Functions. Use `vercel de
 
 ## Placeholder values
 
-Two pieces of email content are not yet known and ship as `______` placeholders
-in `src/lib/eventDetails.js`:
+`WEDDING_DATE` is final: **April 9, 2027**. The 3:30pm start is already carried
+per-venue in `VENUES`, so the date constant holds the date alone.
 
-| Constant | What it is | Why it's blank |
-|---|---|---|
-| `WEDDING_DATE` | The date of the wedding | Not present anywhere in the codebase. `RsvpCard.jsx` has only the RSVP-by date of February 9, 2027; `DetailsCard.jsx` has ceremony/reception times but no date. |
-| `CONTACT_PHONE` | Number in the PSA footer | Not yet supplied. |
+`CONTACT_PHONE` is currently the test value `123456789`. It must be swapped for
+the real number before confirmations go to actual guests — the PSA footer is the
+one part of the email that matters when something has gone wrong, and a guest
+who cannot reach anyone has no recourse.
 
-Both are single-line edits in one file, marked with `TODO` and greppable as
-`______`.
-
-### Guard against shipping a placeholder
-
-A `______` reaching a guest's inbox is the failure mode worth preventing, and
-the PSA footer is the one part of the email that matters most when something has
-gone wrong. Two cheap guards:
-
-- A unit test asserting no exported value in `eventDetails.js` contains `______`,
-  skipped/expected-to-fail until the values are filled in.
-- `send-rsvp-confirmation.js` logs a warning when it renders an email containing
-  `______`, so a real send with placeholders is visible in Vercel's logs rather
-  than silent.
-
-Neither blocks development — they just make the omission loud.
+Note the limit of the automated guard: the test in `eventDetails.test.js` only
+catches a literal `______`. It cannot tell that `123456789` is fake. The `TODO`
+comment above the constant is the only remaining marker, so grep for `TODO` in
+`src/lib/eventDetails.js` before going live.

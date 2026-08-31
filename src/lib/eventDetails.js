@@ -12,11 +12,11 @@ export const COUPLE = 'Marco & Alessandra'
 
 export const RSVP_DEADLINE = 'February 9, 2027'
 
-// TODO: fill in the wedding date before the first real send
-export const WEDDING_DATE = PLACEHOLDER
+export const WEDDING_DATE = 'April 9, 2027'
 
-// TODO: fill in the contact number for the confirmation email footer
-export const CONTACT_PHONE = PLACEHOLDER
+// TODO: placeholder for testing -- swap in the real contact number before
+// confirmations go out to actual guests.
+export const CONTACT_PHONE = '123456789'
 
 export const VENUES = [
   {

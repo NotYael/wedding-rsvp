@@ -10,9 +10,8 @@ describe('eventDetails', () => {
     expect(hasPlaceholders()).toBe([WEDDING_DATE, CONTACT_PHONE].includes(PLACEHOLDER))
   })
 
-  // Unskip this once WEDDING_DATE and CONTACT_PHONE are filled in. It is the
-  // guard that stops a literal "______" reaching a guest's inbox.
-  test.skip('no event detail is still a placeholder', () => {
+  // The guard that stops a literal "______" reaching a guest's inbox.
+  test('no event detail is still a placeholder', () => {
     expect(WEDDING_DATE).not.toBe(PLACEHOLDER)
     expect(CONTACT_PHONE).not.toBe(PLACEHOLDER)
   })
