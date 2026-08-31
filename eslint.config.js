@@ -19,8 +19,8 @@ export default defineConfig([
     },
   },
   {
-    // Vercel Functions run on Node, not in the browser.
-    files: ['api/**/*.js'],
+    // Vercel Functions and the Vite config run on Node, not in the browser.
+    files: ['api/**/*.js', 'vite.config.js', 'eslint.config.js'],
     languageOptions: { globals: globals.node },
   },
 ])
