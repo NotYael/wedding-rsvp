@@ -575,13 +575,15 @@ html.home-stack-page body {
    one screen, so its internals are sized in vh and shrink together as the
    viewport gets shorter. The spec values are the upper bound of each clamp. */
 .details-card .stack-card-inner {
+  /* 128px measured from the top of the card, per the spec. The fixed nav
+     overlays the first 56px of that, so this still clears it. */
+  --details-pad-y: clamp(40px, 10vh, 128px);
+
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: clamp(2rem, 11vh, 7rem);
-  /* 128px measured from the top of the card, per the spec. The fixed nav
-     overlays the first 56px of that, so this still clears it. */
-  padding: clamp(40px, 10vh, 128px) 148px;
+  padding: var(--details-pad-y) 148px;
 }
 
 /* The rows sit in a fixed measure rather than filling the padding box. Without
@@ -660,11 +662,42 @@ html.home-stack-page body {
 
 @media (max-width: 1100px) {
   .details-card .stack-card-inner {
-    padding: clamp(40px, 6vh, 96px) 32px;
+    --details-pad-y: clamp(40px, 6vh, 96px);
+
+    padding: var(--details-pad-y) 32px;
   }
 }
 
-@media (max-width: 768px) {
+/* Tablets keep the desktop two-column row, so across that range the type is
+   capped on vw as well as vh: half the window minus the padding is all a venue
+   gets, and the address is the longest line in the card -- sized on height
+   alone it wraps mid-phrase on a tall tablet. The artwork already tracks the
+   column through its own `100%` term. Below the collapse the venue has the
+   full width back, so the cap stops there. */
+@media (min-width: 641px) and (max-width: 1100px) {
+  .details-title {
+    font-size: clamp(2.5rem, min(10vh, 13vw), 96px);
+  }
+
+  .details-value {
+    font-size: clamp(0.85rem, min(2.5vh, 2.4vw), 24px);
+  }
+}
+
+/* Centred between its own paddings the block reads bottom-heavy, so the extra
+   padding at the foot lifts the two rows off the true centre by half of it.
+   Only where the card has height to spare: on a shorter screen the rows
+   already fill it edge to edge and a lift would slide the ceremony title up
+   under the fixed nav. */
+@media (min-height: 860px) {
+  .details-card .stack-card-inner {
+    padding-bottom: calc(var(--details-pad-y) + clamp(0px, 5vh - 40px, 16px));
+  }
+}
+
+/* Phones only: a tablet still has the width for two columns, and collapsing it
+   there turned one screen of card into a scroll. */
+@media (max-width: 640px) {
   .details-card .stack-card-inner {
     padding: calc(var(--nav-h) + 32px) 20px 48px;
     gap: 3rem;
