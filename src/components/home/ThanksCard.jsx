@@ -11,7 +11,9 @@ export function ThanksCard() {
 
       <div className="thanks-signoff">
         <img className="thanks-signature" src="/signature.svg" alt="" width="69" height="64" />
-        <p className="thanks-kicker">With love, Marco &amp; Alessandra</p>
+        <p className="thanks-kicker">
+          With love, <span className="thanks-names">Marco &amp; Alessandra</span>
+        </p>
       </div>
     </StackCard>
   )

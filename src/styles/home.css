@@ -1384,6 +1384,13 @@ html.home-stack-page body {
   padding: 0.08em 0 0.14em;
 }
 
+/* Keeps the two names together: when the sign-off is too wide for a narrow
+   screen it breaks after "With love," instead of between "Marco &" and
+   "Alessandra". */
+.thanks-names {
+  white-space: nowrap;
+}
+
 .thanks-signoff {
   display: flex;
   flex-direction: column;
