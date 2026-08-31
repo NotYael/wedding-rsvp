@@ -1,8 +1,12 @@
 import { StackCard } from './StackCard'
 
 const GROUPS = [
-  { label: 'Gentlemen', lines: ['Barong Tagalog with', 'black or khaki pants'] },
-  { label: 'Ladies', lines: ['Long gowns in any', 'color other than', 'black and white'] },
+  { slug: 'gentlemen', label: 'Gentlemen', lines: ['Barong Tagalog with', 'black pants'] },
+  {
+    slug: 'ladies',
+    label: 'Ladies',
+    lines: ['Long gowns in any color.', 'No black & white dresses.'],
+  },
 ]
 
 export function AttireCard() {
@@ -20,7 +24,7 @@ export function AttireCard() {
           </h2>
 
           {GROUPS.map((group) => (
-            <div className="attire-group" key={group.label}>
+            <div className={`attire-group attire-group--${group.slug}`} key={group.slug}>
               <p className="attire-group-label">{group.label}</p>
               <p className="attire-group-value">
                 {group.lines.map((line) => (

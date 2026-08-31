@@ -786,25 +786,45 @@ html.home-stack-page body {
     height: min(380px, 40vh);
   }
 
-  /* The two groups run side by side with the title spanning above them. Stacked,
-     the title's own bottom margin plus two full-width groups push this card well
-     past one screen on a phone. */
   .attire-text {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    column-gap: 1.5rem;
     justify-self: stretch;
     text-align: center;
   }
 
   .attire-title {
-    grid-column: 1 / -1;
     margin-bottom: 1.5rem;
   }
 
-  /* Siblings in a row now, so the stacked rhythm would only push them apart. */
   .attire-group + .attire-group {
-    margin-top: 0;
+    margin-top: 1.5rem;
+  }
+
+  /* Each group runs full width now, so the desktop line breaks are no longer
+     the right ones -- let the copy wrap to the column instead. The spans carry
+     no whitespace of their own, so re-joining them needs a space put back.
+     Type follows the nav wordmark: light and letterspaced. */
+  .attire-group-value {
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 1.5px;
+
+    span {
+      display: inline;
+    }
+
+    span:not(:last-child)::after {
+      content: ' ';
+    }
+  }
+
+  /* Except the ladies', which is two whole sentences rather than one phrase cut
+     in half -- the second belongs on its own line, not run on from the first. */
+  .attire-group--ladies .attire-group-value span {
+    display: block;
+  }
+
+  .attire-group--ladies .attire-group-value span:not(:last-child)::after {
+    content: none;
   }
 }
 
