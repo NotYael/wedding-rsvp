@@ -14,23 +14,44 @@ const TRACKED_IDS = ['hero', ...HOME_SECTIONS.map((section) => section.id)]
 // Kept as one string so the two cannot drift apart.
 const MOBILE_QUERY = '(max-width: 640px)'
 
+/* Where a card sits in the document, which is NOT what it will tell you while
+   it is pinned.
+
+   The cards are sticky, and a card the reader has scrolled past is pinned at
+   the top of the viewport. Both of the ways to ask a card where it is report
+   that pinned position, not its place in the page: getBoundingClientRect gives
+   top:0, and offsetTop gives window.scrollY. Every backwards jump therefore
+   computed a target equal to the position we were already at and moved nothing
+   -- go to the FAQs, press Details, and the page just sat there. It is not
+   recoverable arithmetic either; the reported value is clamped to a constant,
+   so there is no pinning offset left to subtract back out.
+
+   Switching sticky off for the length of the measurement is what makes the
+   answer honest. Sticky is a paint-time offset and contributes no geometry, so
+   the class below moves nothing -- and because we never yield between adding
+   and removing it, no frame is ever painted in the measuring state.
+
+   Reading offsetTop is what forces the layout the class change just
+   invalidated, so it has to happen between the two, not after. Only the sticky
+   cards were ever affected: RSVP and FAQs opt out via `stack-card--tall`, which
+   is why those two links worked and the rest did not. */
+const sectionTop = (target) => {
+  const stack = target.closest('.home-stack')
+  stack?.classList.add('is-measuring')
+  const top = target.offsetTop
+  stack?.classList.remove('is-measuring')
+  return top
+}
+
 const scrollToSection = (id) => {
   const target = document.getElementById(id)
   if (!target) return
 
-  // offsetTop, not scrollIntoView. The cards are sticky, so a pinned one sits at
-  // the top of the viewport and reports a rect of top:0 however far down the
-  // page we are -- scrollIntoView then decides it is already in place and does
-  // nothing, which killed every backwards jump. offsetTop is the card's layout
-  // position, unaffected by pinning, and it is document-relative here because
-  // body has no margin and nothing between it and the cards is positioned. The
-  // active-link effect below measures the same way, so the two agree.
-  //
   // Smooth is requested per call rather than via a global `scroll-behavior`, so
   // it applies to nav clicks only and not to anchor jumps or any other
   // programmatic scroll. Readers who ask for reduced motion get an instant jump.
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  window.scrollTo({ top: target.offsetTop, behavior: reducedMotion ? 'auto' : 'smooth' })
+  window.scrollTo({ top: sectionTop(target), behavior: reducedMotion ? 'auto' : 'smooth' })
 }
 
 export function GuestNav({ onLogout }) {
@@ -48,10 +69,17 @@ export function GuestNav({ onLogout }) {
   useEffect(() => {
     if (!isHome) return undefined
 
-    // The topmost card is whichever one's layout position has passed the top of
-    // the window. offsetTop is used rather than IntersectionObserver because the
-    // cards are sticky: a pinned card still counts as fully on screen even once
-    // the next one has covered it, so observed visibility is meaningless here.
+    // Not IntersectionObserver: a pinned card still counts as fully on screen
+    // long after the next one has covered it, so observed visibility says
+    // nothing about which card the reader is looking at.
+    //
+    // This reads the raw offsetTop, deliberately -- do NOT route it through
+    // sectionTop(). It WANTS the pinned value. A pinned card reports scrollY,
+    // which always clears the probe, while a card not yet reached reports its
+    // real position and fails it; taking the last id to pass in document order
+    // therefore lands on the topmost pinned card, which is the one on screen.
+    // Measuring honestly here would also mean forcing a layout every frame of
+    // every scroll, for an answer that is already correct.
     let frame = 0
 
     const update = () => {

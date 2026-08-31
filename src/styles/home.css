@@ -380,6 +380,17 @@ html.home-stack-page body {
   min-height: 100dvh;
 }
 
+/* Held for the duration of a measurement in GuestNav.jsx, never across a paint.
+   A pinned card reports its pinned position -- the top of the viewport -- from
+   both offsetTop and getBoundingClientRect, so anything that needs to know
+   where a card actually lives has to ask while sticky is off. Sticky does not
+   affect layout, so dropping it changes no geometry and the card returns to
+   exactly where it was. Two classes deep on purpose: this has to outrank the
+   position each card is given below and in the media queries at the end. */
+.home-stack.is-measuring .stack-card {
+  position: static;
+}
+
 .stack-card-inner {
   flex: 1 1 auto;
   min-height: 0;
