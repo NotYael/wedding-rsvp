@@ -27,7 +27,13 @@ const PAGE = '#fbf7f5'
 const SCRIPT = "'Imperial Script','Snell Roundhand','Apple Chancery',Georgia,serif"
 const UI = "Montserrat,'Helvetica Neue',Helvetica,Arial,sans-serif"
 
-const FONT_ORIGIN = 'https://pookiesparty.com/fonts'
+/* Email has no origin of its own, so every asset needs an absolute URL. */
+const SITE_ORIGIN = 'https://pookiesparty.com'
+const FONT_ORIGIN = `${SITE_ORIGIN}/fonts`
+
+/* A PNG, not the site's signature.svg: Gmail refuses to render SVG in email and
+   Outlook cannot either. Served at 3x so it stays crisp on a retina phone. */
+const SIGNATURE_SRC = `${SITE_ORIGIN}/signature.png`
 
 const escape = (value) =>
   String(value)
@@ -88,7 +94,10 @@ export function renderConfirmation(group, details) {
     ]),
     `If anything above is wrong, please call us right away at ${contactPhone}.`,
     '',
-    'We cannot wait to celebrate with you.',
+    'We look forward to celebrating with you.',
+    '',
+    'With love,',
+    couple,
   ].join('\n')
 
   const rosterRows = roster
@@ -165,14 +174,21 @@ export function renderConfirmation(group, details) {
           </td>
         </tr>
 
-        <!-- sign-off: brown card, cream type -->
+        <!-- sign-off: the Thanks card -- brown, cream type, monogram, names -->
         <tr>
-          <td style="background:${BROWN};padding:30px 32px 34px;">
-            <p style="margin:0 0 10px;font-family:${UI};font-size:13px;line-height:1.6;color:${CREAM};">
+          <td align="center" style="background:${BROWN};padding:34px 32px 38px;">
+            <p style="margin:0 0 22px;font-family:${UI};font-size:13px;line-height:1.6;color:${CREAM};">
               If anything above is wrong, please call us right away at
               <strong style="white-space:nowrap;">${escape(contactPhone)}</strong>.
             </p>
-            <p style="margin:0;font-family:${UI};font-size:11px;letter-spacing:2.4px;text-transform:uppercase;color:${CREAM};opacity:0.75;">We can&rsquo;t wait to celebrate with you</p>
+
+            <p style="margin:0 0 20px;font-family:${SCRIPT};font-size:34px;line-height:1.15;color:${CREAM};">We look forward to celebrating with you.</p>
+
+            <img src="${SIGNATURE_SRC}" alt="${escape(couple)}" width="52" height="48" style="display:block;margin:0 auto 14px;width:52px;height:48px;border:0;outline:none;text-decoration:none;" />
+
+            <p style="margin:0;font-family:${UI};font-size:11px;letter-spacing:2.4px;text-transform:uppercase;color:${CREAM};">
+              With love, <span style="white-space:nowrap;">${escape(couple)}</span>
+            </p>
           </td>
         </tr>
 
