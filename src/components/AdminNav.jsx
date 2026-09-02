@@ -9,6 +9,9 @@ export function AdminNav({ onLogout }) {
         <NavLink to="/admin" end className={linkClass}>
           Guest List
         </NavLink>
+        <NavLink to="/admin/emails" className={linkClass}>
+          Email Log
+        </NavLink>
       </div>
       <button className="log-out-button" onClick={onLogout}>
         Log out

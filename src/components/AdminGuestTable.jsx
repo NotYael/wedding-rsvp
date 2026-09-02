@@ -1,21 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
-import { supabase } from '../lib/supabaseClient'
+import { useMemo, useState } from 'react'
+import { useGuests } from '../hooks/useGuests'
 import { downloadGuestsAsCsv, downloadGuestsAsPdf } from '../lib/guestExport'
 import { countActiveFilters, describeFilters, matchesFilters } from '../lib/guestFilters'
+import { CONFIRMATION_LABELS } from '../lib/confirmationStatus'
 import { AdminGuestFilters } from './AdminGuestFilters'
 import { StatCards } from './StatCards'
-
-/* Resend only keeps its own logs for 30 days, which is shorter than the RSVP
-   window, so the delivery outcome is mirrored onto the guest row. "Bounced" is
-   the one worth acting on: that guest thinks they are confirmed and never got
-   the details. */
-const CONFIRMATION_LABELS = {
-  sent: 'Sent',
-  delivered: 'Delivered',
-  bounced: 'Bounced ⚠',
-  complained: 'Marked as spam',
-  failed: 'Failed ⚠',
-}
 
 /* Translucent washes rather than the flat pastels this used to use. The table
    is cream text on #15221F now, so an opaque pastel fill would leave the row
@@ -50,55 +39,13 @@ function groupByParty(guests) {
 }
 
 export function AdminGuestTable() {
-  const [guests, setGuests] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const { guests, loading, error } = useGuests()
   const [search, setSearch] = useState('')
   const [filters, setFilters] = useState({})
   const [highlightParties, setHighlightParties] = useState(true)
 
   const toggleFilter = (key, checked) => setFilters((prev) => ({ ...prev, [key]: checked }))
   const clearFilters = () => setFilters({})
-
-  useEffect(() => {
-    let active = true
-
-    supabase
-      .from('guests')
-      .select('*')
-      .then(({ data, error: fetchError }) => {
-        if (!active) return
-        if (fetchError) {
-          setError('Could not load the guest list.')
-        } else {
-          setGuests(data)
-        }
-        setLoading(false)
-      })
-
-    const channel = supabase
-      .channel('guests-admin')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'guests' }, (payload) => {
-        setGuests((prev) => {
-          if (payload.eventType === 'INSERT') {
-            return [...prev, payload.new]
-          }
-          if (payload.eventType === 'UPDATE') {
-            return prev.map((guest) => (guest.id === payload.new.id ? payload.new : guest))
-          }
-          if (payload.eventType === 'DELETE') {
-            return prev.filter((guest) => guest.id !== payload.old.id)
-          }
-          return prev
-        })
-      })
-      .subscribe()
-
-    return () => {
-      active = false
-      supabase.removeChannel(channel)
-    }
-  }, [])
 
   const parties = useMemo(() => groupByParty(guests), [guests])
 

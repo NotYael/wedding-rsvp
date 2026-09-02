@@ -65,11 +65,10 @@ export function renderConfirmation(group, details) {
 
   const attendance = ({ events }) => (events.length ? events.join(' + ') : 'Not attending')
 
-  const subject = `Your RSVP is confirmed — ${couple}`
+  const subject = `[TESTING] Your RSVP is confirmed — ${couple}`
 
   const text = [
     'This is an automated message. Please do not reply to this email.',
-    `If anything below is wrong, call us at ${contactPhone}.`,
     '',
     '----------------------------------------',
     '',

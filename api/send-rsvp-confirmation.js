@@ -8,12 +8,10 @@ import {
   VENUES,
   WEDDING_DATE,
 } from '../src/lib/eventDetails.js'
+import { MAX_PARTY_SIZE } from '../src/lib/rsvpLimits.js'
 
 const FROM = `${COUPLE} <rsvp@pookiesparty.com>`
 const RESEND_ENDPOINT = 'https://api.resend.com/emails'
-
-/** A party this size is a data-entry accident or an abuse attempt, not a family. */
-const MAX_PARTY_SIZE = 20
 
 const json = (body, status = 200) =>
   new Response(JSON.stringify(body), {

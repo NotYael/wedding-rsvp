@@ -573,6 +573,31 @@ body:has(.admin-login) {
   }
 }
 
+/* ---------- email log ---------- */
+
+/* The address is the row's identity here, the way the name is in the guest
+   table, so it takes the same weight the name column carries there. */
+.admin-shell .email-log-table .email-log-address {
+  color: var(--cream);
+  font-weight: 400;
+}
+
+/* Bounced, spam, failed, never sent -- the four states an admin has to do
+   something about. Colour alone would not carry it, so the two worst already
+   print a warning glyph in their label; this makes them findable at a glance
+   while scanning the column. */
+.admin-shell .email-log-table .email-log-alert {
+  color: var(--danger);
+}
+
+/* A send that never happened has no timestamp, so the cell holds the RSVP date
+   instead. It is context rather than the column's own value, which is why it
+   recedes to the muted tone. */
+.admin-shell .email-log-table .email-log-muted {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
 /* ---------- primary actions ---------- */
 
 .admin-shell .admin-export-actions {

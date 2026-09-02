@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { PersonFields } from './PersonFields'
 import { RSVP_EVENTS, eventsForPerson, hasAnyEvent, noEvents } from '../lib/rsvpEvents'
+import { MAX_PARTY_SIZE } from '../lib/rsvpLimits'
 
 function makePerson(id) {
   return {
@@ -50,6 +51,7 @@ export function GuestRsvpForm() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [fieldErrors, setFieldErrors] = useState({})
+  const [limitReached, setLimitReached] = useState(false)
 
   const clearError = (id, field) =>
     setFieldErrors((prev) => {
@@ -90,12 +92,22 @@ export function GuestRsvpForm() {
     clearError(id, 'events')
   }
 
+  /* The button stays live at the cap rather than going disabled, so the guest
+     who clicks it gets told why nothing happened. A disabled control explains
+     nothing, and this is the point where they need to know to split the party
+     across two submissions. */
   const addPerson = () => {
+    if (people.length >= MAX_PARTY_SIZE) {
+      setLimitReached(true)
+      return
+    }
+    setLimitReached(false)
     nextId.current += 1
     setPeople((prev) => [...prev, makePerson(nextId.current)])
   }
 
   const removePerson = (id) => {
+    setLimitReached(false)
     setPeople((prev) => prev.filter((person) => person.id !== id))
     setFieldErrors((prev) => {
       const next = { ...prev }
@@ -169,6 +181,7 @@ export function GuestRsvpForm() {
     setPartyEvents(noEvents())
     setPeople([makePerson(0)])
     setFieldErrors({})
+    setLimitReached(false)
     setSuccess(true)
 
     // Deliberately not awaited: the guest should not wait on an email.
@@ -246,6 +259,13 @@ export function GuestRsvpForm() {
         <button type="button" className="rsvp-button rsvp-button--add" onClick={addPerson}>
           <span aria-hidden="true">+</span> RSVP for another person
         </button>
+
+        {limitReached && (
+          <p className="rsvp-error" role="alert">
+            That&apos;s the most one RSVP can cover — {MAX_PARTY_SIZE} guests. Please submit this
+            one, then send another RSVP for anyone else.
+          </p>
+        )}
 
         {error && (
           <p className="rsvp-error" role="alert">

@@ -4,6 +4,7 @@ import { GuestLayout } from './pages/GuestLayout'
 import { HomePage } from './pages/HomePage'
 import { AdminLayout } from './pages/AdminLayout'
 import { AdminGuestListPage } from './pages/AdminGuestListPage'
+import { AdminEmailLogPage } from './pages/AdminEmailLogPage'
 import { LoadingScreen } from './components/LoadingScreen'
 import './App.css'
 
@@ -17,6 +18,7 @@ function App() {
           </Route>
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminGuestListPage />} />
+            <Route path="emails" element={<AdminEmailLogPage />} />
           </Route>
           {/* TODO: temporary preview of the RoleGate wait state -- remove. */}
           <Route path="/loading" element={<LoadingScreen />} />
