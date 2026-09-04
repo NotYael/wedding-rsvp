@@ -118,6 +118,10 @@ export function AdminGuestTable() {
           className="admin-highlight-toggle"
           /* Absent rather than "false" when off, so CSS can match on [data-active]. */
           data-active={highlightParties || undefined}
+          /* The label is fixed now, so it no longer says which way the toggle is
+             set -- sighted users read that off the fill, and this is the same
+             fact for anyone who cannot see it. */
+          aria-pressed={highlightParties}
           onClick={() => setHighlightParties((v) => !v)}
         >
           {/* The bolt is a phone-only affordance -- there the label is visually
@@ -127,9 +131,7 @@ export function AdminGuestTable() {
           <svg className="admin-highlight-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <path d="M13 2 4.5 13.5H11l-1 8.5L18.5 10.5H12z" />
           </svg>
-          <span className="admin-highlight-text">
-            {highlightParties ? 'Turn off party highlighting' : 'Turn on party highlighting'}
-          </span>
+          <span className="admin-highlight-text">Party Lighting</span>
         </button>
       </div>
 
