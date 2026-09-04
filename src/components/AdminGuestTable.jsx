@@ -138,7 +138,7 @@ export function AdminGuestTable() {
 
       {!loading && !error && (
         <div className="admin-table-wrap">
-          <table className="admin-table">
+          <table className="admin-table guest-table">
             <thead>
               <tr>
                 <th>Name</th>

@@ -507,9 +507,86 @@ body:has(.admin-login) {
   font-weight: 300;
 }
 
+/* Fixed, because auto layout sized every column to its widest row -- including
+   the rows scrolled out of view. One guest with a long dietary note stretched
+   that column past 700px while Role sat at 120, so the whitespace beside a
+   short value in a wide column read as a gap several times the one next to it,
+   even though the padding between every pair of columns was the same 2.5rem
+   the whole time. The shares below hold whatever the data does.
+
+   min-width is what keeps that honest: the shares are cut so each column fits
+   its longest expected value on one line at this width, and a window narrower
+   than it scrolls the table in its wrapper rather than squeezing the columns. */
+.admin-shell .admin-table {
+  table-layout: fixed;
+}
+
+.admin-shell .guest-table {
+  min-width: 80rem;
+}
+
+.admin-shell .email-log-table {
+  min-width: 52rem;
+}
+
+/* nowrap (App.css, for the light theme's tables) is what let one long value
+   widen a whole column. Wrapping keeps it inside its own column instead, and
+   `anywhere` covers the case normal wrapping cannot break -- an address or a
+   note written without spaces. Cells top-align so a wrapped second line grows
+   the row downwards rather than pushing its neighbours off the baseline. */
 .admin-shell .admin-table th,
 .admin-shell .admin-table td {
   padding: 0.8rem 1.25rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  vertical-align: top;
+}
+
+/* Name, Role, Email, Phone, Dietary Restrictions, Confirmation, Submitted. */
+.admin-shell .guest-table th:nth-child(1) {
+  width: 13%;
+}
+
+.admin-shell .guest-table th:nth-child(2) {
+  width: 8%;
+}
+
+.admin-shell .guest-table th:nth-child(3) {
+  width: 21%;
+}
+
+.admin-shell .guest-table th:nth-child(4) {
+  width: 12%;
+}
+
+.admin-shell .guest-table th:nth-child(5) {
+  width: 17%;
+}
+
+.admin-shell .guest-table th:nth-child(6) {
+  width: 13%;
+}
+
+.admin-shell .guest-table th:nth-child(7) {
+  width: 16%;
+}
+
+/* Sent, To, Recipients, Status. Recipients takes the largest share: it is the
+   one free-text column here, holding a joined list of names. */
+.admin-shell .email-log-table th:nth-child(1) {
+  width: 20%;
+}
+
+.admin-shell .email-log-table th:nth-child(2) {
+  width: 26%;
+}
+
+.admin-shell .email-log-table th:nth-child(3) {
+  width: 34%;
+}
+
+.admin-shell .email-log-table th:nth-child(4) {
+  width: 20%;
 }
 
 
