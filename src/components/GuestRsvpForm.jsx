@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabaseClient'
 import { PersonFields } from './PersonFields'
 import { RSVP_EVENTS, eventsForPerson, hasAnyEvent, noEvents } from '../lib/rsvpEvents'
 import { MAX_PARTY_SIZE } from '../lib/rsvpLimits'
+import { CONTACT_PHONE } from '../lib/eventDetails'
 
 function makePerson(id) {
   return {
@@ -192,6 +193,15 @@ export function GuestRsvpForm() {
     return (
       <div className="rsvp-success">
         <p>Your RSVP is in — thank you. We can&apos;t wait to celebrate with you.</p>
+        {/* The guest is the only one who can tell us the confirmation never
+            landed -- a bounce we never hear about looks identical to a delivered
+            email from our side. Worth asking them to check. */}
+        <p className="rsvp-success-note">
+          A confirmation email is on its way with all the details. Please give it a read — if
+          anything is wrong, or it never arrives, call us right away at{' '}
+          <a href={`tel:${CONTACT_PHONE.replace(/\s/g, '')}`}>{CONTACT_PHONE}</a> and we&apos;ll fix
+          it.
+        </p>
         <button type="button" className="rsvp-button" onClick={() => setSuccess(false)}>
           RSVP for another party
         </button>

@@ -1324,6 +1324,23 @@ html.home-stack-page body {
     width: auto;
   }
 
+  /* Secondary to the thank-you above it: the same uppercase treatment a size
+     down, so a sentence this long stays readable at this tracking without
+     competing with the line that confirms the RSVP actually landed. */
+  .rsvp-success-note {
+    max-width: 34rem;
+    font-size: clamp(0.7rem, 1.05vw, 14px);
+    letter-spacing: 0.06em;
+    line-height: 1.7;
+
+    a {
+      color: var(--rust);
+      font-weight: 700;
+      text-underline-offset: 3px;
+      white-space: nowrap;
+    }
+  }
+
   .rsvp-button {
     width: auto;
     padding-inline: 32px;
