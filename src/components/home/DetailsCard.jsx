@@ -1,4 +1,4 @@
-import { VENUES } from '../../lib/eventDetails'
+import { VENUES, WEDDING_DATE } from '../../lib/eventDetails'
 import { StackCard } from './StackCard'
 
 function VenueText({ venue }) {
@@ -8,7 +8,9 @@ function VenueText({ venue }) {
 
       <div className="details-block">
         <p className="details-label">When</p>
-        <p className="details-value">{venue.time}</p>
+        <p className="details-value">
+          {venue.time} on {WEDDING_DATE}
+        </p>
       </div>
 
       <div className="details-block">
