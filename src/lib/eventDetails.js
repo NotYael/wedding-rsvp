@@ -16,7 +16,7 @@ export const WEDDING_DATE = 'April 9, 2027'
 
 // TODO: placeholder for testing -- swap in the real contact number before
 // confirmations go out to actual guests.
-export const CONTACT_PHONE = '123456789'
+export const CONTACT_PHONE = '+63 977 819 9135'
 
 export const VENUES = [
   {
