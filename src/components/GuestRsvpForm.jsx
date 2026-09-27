@@ -29,13 +29,9 @@ const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
  */
 async function sendConfirmation(partyId) {
   try {
-    const { data } = await supabase.auth.getSession()
-    const token = data?.session?.access_token
-    if (!token) return
-
     await fetch('/api/send-rsvp-confirmation', {
       method: 'POST',
-      headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
+      headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ partyId }),
     })
   } catch (error) {

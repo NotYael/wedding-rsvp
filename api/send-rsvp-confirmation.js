@@ -65,29 +65,27 @@ export async function POST(request) {
 
   const admin = supabaseAdmin()
 
-  // Only a signed-in guest may trigger a send. This rejects anonymous callers
-  // before the database is touched.
-  const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '')
-  if (!token) return json({ error: 'Not authorized.' }, 401)
-
-  const { data: auth, error: authError } = await admin.auth.getUser(token)
-  if (authError || auth?.user?.app_metadata?.role !== 'guest') {
-    return json({ error: 'Not authorized.' }, 401)
-  }
-
+  // The site has no guest login, so anyone can call this. What keeps it from
+  // being abused is that each party is emailed at most once: stamping
+  // confirmation_sent_at claims the unsent rows atomically, so a repeat or
+  // concurrent call finds nothing left to send.
+  //
   // Recipients come from the database, never from the request body, so this
   // endpoint cannot be used to email anyone who is not already a guest.
-  const { data: rows, error: lookupError } = await admin
+  const { data: claimed, error: lookupError } = await admin
     .from('guests')
-    .select('id, name, email, attending_ceremony, attending_reception')
+    .update({ confirmation_sent_at: new Date().toISOString() })
     .eq('party_id', partyId)
-    .order('is_primary', { ascending: false })
+    .is('confirmation_sent_at', null)
+    .select('id, name, email, is_primary, attending_ceremony, attending_reception')
 
   if (lookupError) {
     console.error('send-rsvp-confirmation: lookup failed', lookupError)
     return json({ error: 'Could not load the party.' }, 500)
   }
-  if (!rows?.length) return json({ error: 'Party not found.' }, 404)
+  if (!claimed?.length) return json({ error: 'Party not found.' }, 404)
+
+  const rows = [...claimed].sort((a, b) => Number(b.is_primary) - Number(a.is_primary))
   if (rows.length > MAX_PARTY_SIZE) {
     console.error('send-rsvp-confirmation: party over cap', partyId, rows.length)
     return json({ error: 'Party too large.' }, 400)

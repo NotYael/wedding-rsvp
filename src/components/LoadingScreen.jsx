@@ -1,7 +1,7 @@
 /**
  * The full-screen wait state RoleGate shows while the session resolves. Built
  * as a quieter hero card -- same olive field, script wordmark and couple mark
- * as GuestLogin -- so the first paint is already the site instead of a neutral
+ * as the home page -- so the first paint is already the site instead of a neutral
  * spinner.
  */
 export function LoadingScreen({ label = 'Loading' }) {

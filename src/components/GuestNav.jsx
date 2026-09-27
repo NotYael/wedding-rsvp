@@ -54,7 +54,7 @@ const scrollToSection = (id) => {
   window.scrollTo({ top: sectionTop(target), behavior: reducedMotion ? 'auto' : 'smooth' })
 }
 
-export function GuestNav({ onLogout }) {
+export function GuestNav() {
   const { pathname } = useLocation()
   const isHome = pathname === '/'
   const [activeId, setActiveId] = useState('hero')
@@ -188,10 +188,6 @@ export function GuestNav({ onLogout }) {
                 {section.label}
               </button>
             ))}
-
-          <button type="button" className="guest-nav-link" onClick={onLogout}>
-            Log out
-          </button>
         </div>
 
         {/* A disclosure rather than a dialog: `aria-modal` would hide everything
@@ -230,17 +226,6 @@ export function GuestNav({ onLogout }) {
                 </button>
               ))}
           </div>
-
-          <button
-            type="button"
-            className="guest-nav-menu-logout"
-            onClick={() => {
-              setMenuOpen(false)
-              onLogout()
-            }}
-          >
-            Log out
-          </button>
         </div>
       )}
     </>
