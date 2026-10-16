@@ -1,10 +1,10 @@
 name: Keep Supabase alive
 
 # Supabase pauses free-tier projects after 7 days of inactivity.
-# Run a tiny query every 5 days so the project stays active.
+# Run a tiny query every 8 hours so the project stays active.
 on:
   schedule:
-    - cron: '0 9 */5 * *'
+    - cron: '0 */8 * * *'
   workflow_dispatch:
 
 jobs:
