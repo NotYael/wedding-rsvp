@@ -1,3 +1,4 @@
+import { RSVP_DEADLINE } from '../../lib/eventDetails'
 import { GuestRsvpForm } from '../GuestRsvpForm'
 import { StackCard } from './StackCard'
 
@@ -13,7 +14,7 @@ export function RsvpCard() {
           <p className="rsvp-lede">
             Kindly respond by
             <br />
-            <strong>February 9, 2027</strong>.
+            <strong>{RSVP_DEADLINE}</strong>.
           </p>
         </div>
 

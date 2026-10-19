@@ -10,7 +10,7 @@ export const PLACEHOLDER = '______'
 
 export const COUPLE = 'Marco & Alessandra'
 
-export const RSVP_DEADLINE = 'February 9, 2027'
+export const RSVP_DEADLINE = 'March 9, 2027'
 
 export const WEDDING_DATE = 'April 9, 2027'
 
