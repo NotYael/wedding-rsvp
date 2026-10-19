@@ -170,7 +170,9 @@ export function GuestRsvpForm() {
     setSubmitting(false)
 
     if (insertError) {
-      setError('Something went wrong submitting your RSVP. Please try again.')
+      setError(
+        `Something went wrong on our end. Please try again. If this keeps failing, please message Alix at ${CONTACT_PHONE}.`,
+      )
       return
     }
 
@@ -194,7 +196,7 @@ export function GuestRsvpForm() {
             email from our side. Worth asking them to check. */}
         <p className="rsvp-success-note">
           A confirmation email is on its way with all the details. Please give it a read — if
-          anything is wrong, or it never arrives, call us right away at{' '}
+          anything is wrong, or it never arrives, give Alix a message right away at{' '}
           <a href={`tel:${CONTACT_PHONE.replace(/\s/g, '')}`}>{CONTACT_PHONE}</a> and we&apos;ll fix
           it.
         </p>
