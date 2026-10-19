@@ -1,3 +1,4 @@
+import { CONTACT_PHONE } from '../../lib/eventDetails'
 import { StackCard } from './StackCard'
 
 /* Listed in reading order: down the left column first, then down the right.
@@ -14,20 +15,16 @@ const FAQS = [
   },
   {
     q: 'What gifts do you prefer?',
-    // Answers are rendered as-is, so a node is fine where one needs links.
-    a: (
+    // Answers are rendered as-is, so a node is fine where one needs links. An
+    // array is one paragraph per entry.
+    a: [
+      'Your presence and well wishes are more than enough.',
+      'Should you wish to bless us with a gift, a monetary contribution toward our future adventures, travels, wine collection, and life together would be sincerely appreciated.',
       <>
-        We have a registry in{' '}
-        <a href="https://rustans.com/pages/the-registry-by-rustans" target="_blank" rel="noreferrer">
-          Rustan&rsquo;s
-        </a>{' '}
-        and{' '}
-        <a href="https://giftregistry.crateandbarrel.com.ph/" target="_blank" rel="noreferrer">
-          Crate &amp; Barrel
-        </a>
-        . Gifts in kind will also be appreciated!
-      </>
-    ),
+        For those who prefer a traditional gift, we have also prepared a registry at Rustan’s (Code:{' '}
+        <u>054438</u>).
+      </>,
+    ],
   },
   {
     q: "What happens if I can't attend after submitting my RSVP?",
@@ -35,8 +32,12 @@ const FAQS = [
   },
   {
     q: 'Who can I contact if I have questions?',
-    // PLACEHOLDER — the mock leaves this blank; drop in the coordinator's contact.
-    a: 'Please reach out to our wedding coordinator at ________.',
+    a: (
+      <>
+        Please message Alix at{' '}
+        <u>{CONTACT_PHONE}</u>.
+      </>
+    ),
   },
   {
     q: 'Can dietary restrictions be accommodated?',
@@ -65,7 +66,9 @@ export function FaqsCard() {
               {column.map((faq) => (
                 <details className="faq-item" key={faq.q}>
                   <summary>{faq.q}</summary>
-                  <p>{faq.a}</p>
+                  {[faq.a].flat().map((paragraph, i) => (
+                    <p key={i}>{paragraph}</p>
+                  ))}
                 </details>
               ))}
             </div>
